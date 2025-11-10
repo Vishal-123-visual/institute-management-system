@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+console.log('Environment PORT:', process.env.PORT);
 export const {
   PORT,
   MONGO_URI,
