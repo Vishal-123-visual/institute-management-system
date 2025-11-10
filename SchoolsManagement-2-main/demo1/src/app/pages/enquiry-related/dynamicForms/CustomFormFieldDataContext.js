@@ -25,10 +25,22 @@ export const CustomFormFieldDataContextProvider = ({children}) => {
   const [fieldValues, setFieldValues] = useState([])
 
   useEffect(() => {
-    if (getAllCustomFormFieldDataQuery?.data) {
-      setFieldValues(getAllCustomFormFieldDataQuery.data.map((field) => field.value || []))
-    }
-  }, [getAllCustomFormFieldDataQuery?.data])
+  console.log('CustomFormFieldDataQuery data:', getAllCustomFormFieldDataQuery?.data)
+  if (Array.isArray(getAllCustomFormFieldDataQuery?.data)) {
+    setFieldValues(getAllCustomFormFieldDataQuery.data.map((field) => field.value || []))
+  } else if (Array.isArray(getAllCustomFormFieldDataQuery?.data?.data)) {
+    // In case API returns { data: [...] }
+    setFieldValues(getAllCustomFormFieldDataQuery.data.data.map((field) => field.value || []))
+  } else {
+    console.warn('Unexpected API response:', getAllCustomFormFieldDataQuery?.data)
+    setFieldValues([]) // avoid crash
+  }
+}, [getAllCustomFormFieldDataQuery?.data])
+  // useEffect(() => {
+  //   if (getAllCustomFormFieldDataQuery?.data) {
+  //     setFieldValues(getAllCustomFormFieldDataQuery.data.map((field) => field.value || []))
+  //   }
+  // }, [getAllCustomFormFieldDataQuery?.data])
 
   const handleInputChange = (index, newValue, fieldName, type) => {
     // console.log(type)
