@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 import CourseFeesModel from "../../models/courseFees/courseFees.models.js";
 import DayBookAccountModel from "../../models/day-book/DayBookAccounts.models.js";
@@ -14,14 +15,15 @@ export const addDayBookAccountController = asyncHandler(
           return res.status(400).json({ error: "Account name is required" });
       }
 
-      const existingAccountName = await DayBookAccountModel.find({
+      const existingAccountName = await DayBookAccountModel.findOne({
         accountName,
+        companyId : new mongoose.Types.ObjectId(companyId)
       });
 
-      if (!existingAccountName) {
+      if (existingAccountName) {
         return res
           .status(400)
-          .json({ error: "DayBook Account already exists" });
+          .json({ error: "DayBook Account already exists for this company" });
       }
 
       const newDayBookAccount = new DayBookAccountModel({
@@ -32,6 +34,12 @@ export const addDayBookAccountController = asyncHandler(
       await newDayBookAccount.save();
       res.status(201).json(newDayBookAccount);
     } catch (error) {
+        // ✅ Handle duplicate key error from MongoDB
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: "DayBook Account already exists for this company",
+      });
+    }
       res.status(500).json({
         error: "Error while creating account in daybook" || error.message,
       });

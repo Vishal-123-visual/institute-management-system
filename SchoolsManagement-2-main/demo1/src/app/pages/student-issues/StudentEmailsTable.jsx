@@ -7,6 +7,7 @@ import { useCompanyContext } from '../compay/CompanyContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useStudentCourseFeesContext } from '../courseFees/StudentCourseFeesContext'
+import { get } from 'http'
 
 const BASE_URL = process.env.REACT_APP_BASE_URL
 
@@ -24,7 +25,8 @@ const StudentEmailsTable = ({ studentInfoData }) => {
   const companyCTX = useCompanyContext()
   const studentPayFeeCtx = useStudentCourseFeesContext()
   const result = studentPayFeeCtx.useSingleStudentCourseFees(studentInfoData?._id)
-  const { data: emailTemplate } = companyCTX.getEmailTemplate
+  const { emailTemplate } = useCompanyContext()
+  console.log('getemailt', emailTemplate)
   const { data: singleCompanyData } = companyCTX?.useGetSingleCompanyData(
     studentInfoData?.companyName
   )
@@ -45,6 +47,7 @@ const StudentEmailsTable = ({ studentInfoData }) => {
     const fetchEmailTemplates = async () => {
       try {
         const res = await companyCTX.getEmailTemplate()
+        console.log('email templates:', res)
         setEmailTemplates(res.data || [])
         if (res.data.length > 0) {
           setSelectValue(res.data[0]?.customTemplate) // Set the first template as selected
@@ -240,8 +243,8 @@ const StudentEmailsTable = ({ studentInfoData }) => {
               onChange={handleSelectionChange}
               value={selectValue}
             >
-              {emailTemplates?.length > 0 ? (
-                emailTemplates.map((email) => (
+              {emailTemplate?.length > 0 ? (
+                emailTemplate.map((email) => (
                   <>
                     <option key={email._id} value={email.customTemplate}>
                       Warning Letter
@@ -272,7 +275,7 @@ const StudentEmailsTable = ({ studentInfoData }) => {
             <button
               className='btn btn-primary'
               onClick={() => {
-                selectValue === emailTemplates?.[0]?.customTemplate
+                selectValue === emailTemplate?.[0]?.customTemplate
                   ? sendWarningEmail(student.length > 0 ? student[0] : null)
                   : sendAddmissionCancellationMail(student.length > 0 ? student[0] : null)
               }}

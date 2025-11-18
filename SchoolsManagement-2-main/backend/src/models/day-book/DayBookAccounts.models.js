@@ -5,7 +5,6 @@ const DayBookAccountSchema = new mongoose.Schema(
     accountName: {
       type: String,
       required: true,
-      unique: true,
     },
     accountId: {
       type: String,
@@ -17,14 +16,15 @@ const DayBookAccountSchema = new mongoose.Schema(
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
+      required: true
     },
   },
   { timestamps: true }
 );
 
-const DayBookAccountModel = mongoose.model(
-  "DayBookAccount",
-  DayBookAccountSchema
-);
+// ✅ Unique only within the same company
+DayBookAccountSchema.index({ accountName: 1, companyId: 1 }, { unique: true });
+
+const DayBookAccountModel = mongoose.model("DayBookAccount", DayBookAccountSchema);
 
 export default DayBookAccountModel;

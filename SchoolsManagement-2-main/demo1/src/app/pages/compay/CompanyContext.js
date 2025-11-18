@@ -10,6 +10,7 @@ const CompanyContext = createContext()
 const BASE_URL = process.env.REACT_APP_BASE_URL
 
 export const CompanyContextProvider = ({children}) => {
+  const [emailTemplate,setEmailTemplate] = useState([])
   const queryClient = useQueryClient()
   const {auth} = useAuth()
   let config = {
@@ -708,7 +709,9 @@ export const CompanyContextProvider = ({children}) => {
     queryKey: ['getEmailTemplate'],
     queryFn: async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/email/allTemplates`, config)
+        const response = await axios.get(`${BASE_URL}/api/email/allTemplates`, config) 
+        console.log('allT',response.data)
+        setEmailTemplate(response.data)
         return response.data
       } catch (error) {
         throw new Error('Error fetching student data: ' + error.message)
@@ -740,6 +743,7 @@ export const CompanyContextProvider = ({children}) => {
         /***************** Email Template ************************/
         postEmailTemplate,
         getEmailTemplate,
+        emailTemplate,
         /***************************  whatsapp Message Suggestion start   *****************************/
         postWhatsAppMessageSuggestionStatus,
         getWhatsAppMessageuggestionStatus,

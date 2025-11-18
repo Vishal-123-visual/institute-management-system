@@ -128,10 +128,7 @@ router.post("/sendWarningMail", requireSignIn, async (req, res, next) => {
   }
 });
 
-router.post(
-  "/sendAddmissionCancellationMail",
-  requireSignIn,
-  async (req, res, next) => {
+router.post( "/sendAddmissionCancellationMail",requireSignIn,async (req, res, next) => {
     try {
       const studentData = req.body;
       // console.log(req.body);
@@ -807,10 +804,7 @@ router.post("/sendMailStudent", requireSignIn, async (req, res, next) => {
     .json({ success: true, message: "send mail to student successfully!" });
 });
 
-router.post(
-  "/sendMailToSelectedStudents",
-  requireSignIn,
-  async (req, res, next) => {
+router.post("/sendMailToSelectedStudents",requireSignIn, async (req, res, next) => {
     try {
       const { userIds, company } = req.body;
 

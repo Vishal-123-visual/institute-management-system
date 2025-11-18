@@ -5,6 +5,6 @@ import { addEmailTemplateController, getEmailTemplateController } from '../contr
 const router = Router()
 
 router.post("/template",requireSignIn, isAdmin,addEmailTemplateController)
-router.get("/allTemplates",requireSignIn,isAdmin,getEmailTemplateController)
+router.get("/allTemplates",requireSignIn,isAdmin,getEmailTemplateController) 
 
 export default router;
