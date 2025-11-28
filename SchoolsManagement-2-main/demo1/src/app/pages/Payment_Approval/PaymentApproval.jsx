@@ -23,7 +23,7 @@ const PaymentApproval = () => {
   )
 
   const dataReciepts = getAllStudentsCourseFees?.data?.filter(
-    (data) => data.studentInfo.companyName === params.id
+    (data) => data.studentInfo?.companyName === params.id
   )
 
   const companyCTX = useCompanyContext()

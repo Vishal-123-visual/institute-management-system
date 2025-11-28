@@ -31,6 +31,9 @@ import PastTask from './PastTask'
 import UpcomingTask from './UpcomingTask'
 import TodayTasksNotification from './TodayTasksNotification'
 import {useCustomFormFieldContext} from '../enquiry-related/dynamicForms/CustomFormFieldDataContext'
+import SelectCompany from './SelectCompany'
+import { useCompanyContext } from '../compay/CompanyContext'
+import CompanyCollectionDashBoardBox from './CompanyCollectionDashboardBox'
 
 const DashboardPage: FC = () => (
   <>
@@ -58,6 +61,7 @@ const DashboardPage: FC = () => (
       {/* begin::Col */}
       <div className='col-md-6 col-lg-6 col-xl-6 col-xxl-4 mb-md-5 mb-xl-10'>
         <CollectionDashBoardBox className='h-md-50 mb-5 mb-xl-10' />
+        <CompanyCollectionDashBoardBox className='mt-6' />
         {/* <ListsWidget26 className='h-lg-50' /> */}
         <div className='card card-header pt-5 h-lg-50'>
           <h3 className='card-title text-gray-800 fw-bold'>Flagged Students</h3>
@@ -149,6 +153,7 @@ const DashboardWrapper: FC = () => {
   const [showTask, setShowTask] = useState(false)
   const studentCTX = useAdmissionContext()
   const studentNotesCTX = useCustomFormFieldContext()
+  const {selectedCompany} = useCompanyContext()
 
   useEffect(() => {
     const playAudio = async () => {
@@ -217,7 +222,19 @@ const DashboardWrapper: FC = () => {
   return (
     <div style={{position: 'relative'}}>
       <PageTitle breadcrumbs={[]}>{intl.formatMessage({id: 'MENU.DASHBOARD'})}</PageTitle>
-      <DashboardPage />
+
+            <div className='d-flex justify-content-end mb-5'>
+        <SelectCompany />
+      </div>
+
+      {!selectedCompany ? (
+        <div className='alert alert-warning'>
+          Please select a company to view dashboard data
+        </div>
+      ) : (
+        <DashboardPage />
+      )}
+      
       {currentUser?.role !== 'Student' && (
         <>
           {' '}

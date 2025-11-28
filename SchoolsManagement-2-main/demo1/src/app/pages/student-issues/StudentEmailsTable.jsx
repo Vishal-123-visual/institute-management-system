@@ -7,8 +7,6 @@ import { useCompanyContext } from '../compay/CompanyContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useStudentCourseFeesContext } from '../courseFees/StudentCourseFeesContext'
-import { get } from 'http'
-
 const BASE_URL = process.env.REACT_APP_BASE_URL
 
 const StudentEmailsTable = ({ studentInfoData }) => {

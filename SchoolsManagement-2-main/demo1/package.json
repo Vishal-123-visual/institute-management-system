@@ -43,7 +43,6 @@
     "react-intl": "6.4.4",
     "react-query": "3.38.0",
     "react-router-dom": "6.3.0",
-    "react-scripts": "^0.0.0",
     "react-table": "^7.7.0",
     "react-toastify": "^10.0.5",
     "react-topbar-progress-indicator": "4.1.1",
@@ -79,7 +78,7 @@
     "webpack-cli": "5.1.4"
   },
   "scripts": {
-    "start": " cross-env PORT=3001 react-scripts start",
+    "start": " cross-env PORT=3003 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

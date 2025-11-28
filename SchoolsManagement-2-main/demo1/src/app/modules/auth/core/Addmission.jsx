@@ -29,6 +29,21 @@ export const AdmissionContextProvider = ({ children }) => {
       }
     },
   })
+
+  // students by company and course
+  const GetStudentsByCompanyAndCourse = (companyId,courseId)=>{
+    return useQuery({
+      queryKey: ['studentsByCompanyCourse',companyId,courseId],
+      queryFn: async ()=>{
+        if(!companyId || !courseId) return []
+
+        const response = await axios.get(`${BASE_URL}/api/students/company/${companyId}/course/${courseId}`,config)
+
+        return response.data.data
+      },
+      enabled : !!companyId && !!courseId,
+    })
+  }
   const getCompleteCourseStudentsLists = useQuery({
     queryKey: ['getCompleteCourseStudentsLists'],
     queryFn: async () => {
@@ -385,6 +400,7 @@ export const AdmissionContextProvider = ({ children }) => {
         deleteStudentMutation,
         updateStudentMutation,
         setStudentId,
+        GetStudentsByCompanyAndCourse,
         useGetSingleStudentUsingWithEmail,
         useGetSingleStudentUsingById,
         /********************** Student Fees Alert Start   *******************/

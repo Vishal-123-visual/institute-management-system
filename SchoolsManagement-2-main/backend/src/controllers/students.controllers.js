@@ -390,6 +390,26 @@ export const getStudentsAccordingToCompanyController = asyncHandler(
   }
 );
 
+export const getStudentsAccordingToCourseController = asyncHandler(async(req,res)=>{
+  const {companyId,courseId} = req.params
+
+  if(!companyId || !courseId){
+    return res.status(400).json({
+      success : false,
+      message :"companyId and courseId are required"
+    })
+  }
+  const students = await admissionFormModel.find({
+    companyName : companyId,
+    courseName: courseId
+  }).populate("courseName").sort({name: 1});
+
+  return res.status(200).json({
+    success : true,
+    data : students
+  })
+})
+
 export const addStudentComissionController = asyncHandler(
   async (req, res, next) => {
     const {

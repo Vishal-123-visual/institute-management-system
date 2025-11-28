@@ -67,7 +67,6 @@ export const postApprovalController = async (req, res, next) => {
         EmailSuggestionModel.find({}),
         approvalModel.findOne({ reciept }),
       ]);
-
     const studentGSTStatus = await StudentGST_GuggestionModel.find();
     //console.log(studentGSTStatus[0].studentGST_Guggestion);
     let gstAmount =
@@ -409,8 +408,9 @@ export const postApprovalController = async (req, res, next) => {
                                                   line-height: 24px;
                                                 ">
                                       <strong>${
-                                        student.companyName.reciptNumber
+                                        recieptData?.reciptNumber
                                       }</strong>
+                                      
                                     </td>
                                   </tr>
                                   <tr>

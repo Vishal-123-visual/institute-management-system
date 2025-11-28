@@ -16,6 +16,7 @@ import {
   getAllStudentsAlertPendingFeesDataController,
   updateStudentAsDropOutController,
   updateStudentRenewCourseFeesController,
+  getStudentsAccordingToCourseController,
 } from "../controllers/students.controllers.js";
 import upload from "../../multer-config/storageConfig.js";
 import sendRemainderFeesStudent, {
@@ -27,6 +28,7 @@ import EmailRemainderModel from "../models/email-remainder/email.remainder.model
 import EmailTemplateModel from "../models/email-remainder/emailTemplate.models.js";
 import moment from "moment";
 import admissionFormModel from "../models/addmission_form.models.js";
+import { get } from "mongoose";
 
 const router = Router();
 
@@ -945,6 +947,9 @@ router.put(
 
 // get the student According to company wise
 router.get("/company/:companyId", getStudentsAccordingToCompanyController);
+
+// get the student According to course wise
+router.get('/company/:companyId/course/:courseId',getStudentsAccordingToCourseController)
 
 // get all students
 router.route("/").get(requireSignIn, getAllStudentsController);

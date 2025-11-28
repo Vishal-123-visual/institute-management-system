@@ -2,23 +2,48 @@ import React from 'react'
 import {KTIcon} from '../../../_metronic/helpers'
 import {useCourseContext} from '../course/CourseContext'
 import {useAdmissionContext} from '../../modules/auth/core/Addmission'
+import { useCompanyContext } from '../compay/CompanyContext'
 
 const AllStudentsAccordingToCourses = ({className}) => {
   const courseCtx = useCourseContext()
-  const ctx = useAdmissionContext()
+  //const ctx = useAdmissionContext()
+  const {GetStudentsByCompanyAndCourse} = useAdmissionContext()
+
+
+  // start here 
+  const {selectedCompany , useGetStudentsAccordingToCompanyQuery} = useCompanyContext()
+const companyId = selectedCompany?._id
+// console.log('selectedcomp',selectedCompany)
+// console.log('compid',companyId)
+//const { data: companyStudentsData,isLoading,} = useGetStudentsAccordingToCompanyQuery(companyId)
+
+
+
   const courseName = courseCtx?.getCourseLists?.data || []
-  const students = ctx?.studentsLists?.data?.users || []
+
+    if (!companyId) {
+    return (
+      <div className={`card card-xl ${className || ''}`}>
+        <div className='card-body text-center text-muted'>
+          Please select a company
+        </div>
+      </div>
+    )
+  }
+ //const students = companyStudentsData?.users || []
+  //const students = ctx?.studentsLists?.data?.users || []
 
   // Count students by course ID
-  const studentCounts = students.reduce((acc, student) => {
-    const courseId = student?.courseName?._id
-    // console.log(acc)
-    // console.log(student)
-    if (courseId) {
-      acc[courseId] = (acc[courseId] || 0) + 1
-    }
-    return acc
-  }, {})
+
+  // const studentCounts = students.reduce((acc, student) => {
+  //   const courseId = student?.courseName?._id
+  //   // console.log(acc)
+  //   // console.log(student)
+  //   if (courseId) {
+  //     acc[courseId] = (acc[courseId] || 0) + 1
+  //   }
+  //   return acc
+  // }, {})
 
   return (
     <div className={`card card-xl ${className || ''}`}>
@@ -41,7 +66,8 @@ const AllStudentsAccordingToCourses = ({className}) => {
       {/* Body (Scrollable List) */}
       <div className='card-body pt-0' style={{maxHeight: '400px', overflowY: 'auto'}}>
         {courseName.map((course) => {
-          const studentCount = studentCounts[course._id] || 0
+          //console.log('corse',course)
+          const { data: students = [], isLoading} = GetStudentsByCompanyAndCourse(companyId,course._id)
 
           return (
             <div
@@ -59,7 +85,7 @@ const AllStudentsAccordingToCourses = ({className}) => {
                 </a>
               </div>
               {/* Student Count */}
-              <span className='fw-bold text-danger py-1'>{studentCount} Students</span>
+              <span className='fw-bold text-danger py-1'>{students.length} Students</span>
             </div>
           )
         })}

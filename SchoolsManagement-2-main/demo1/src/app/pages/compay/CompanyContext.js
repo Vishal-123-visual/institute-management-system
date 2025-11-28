@@ -1,4 +1,4 @@
-import {createContext, useContext, useState} from 'react'
+import {createContext, useContext, useEffect, useState} from 'react'
 import axios from 'axios'
 import {useQueryClient, useMutation, useQuery} from 'react-query'
 import {useAuth} from '../../modules/auth'
@@ -10,6 +10,7 @@ const CompanyContext = createContext()
 const BASE_URL = process.env.REACT_APP_BASE_URL
 
 export const CompanyContextProvider = ({children}) => {
+  const [selectedCompany,setSelectedCompany] = useState(null)
   const [emailTemplate,setEmailTemplate] = useState([])
   const queryClient = useQueryClient()
   const {auth} = useAuth()
@@ -259,6 +260,8 @@ export const CompanyContextProvider = ({children}) => {
     },
   })
 
+
+  
   // post whatsapp message suggestion
   const postWhatsAppMessageSuggestionStatus = useMutation({
     mutationFn: async (data) => {
@@ -719,9 +722,27 @@ export const CompanyContextProvider = ({children}) => {
     },
   })
 
+
+  useEffect(()=>{
+    const savedCompany = localStorage.getItem('selectedCompany')
+    if(savedCompany){
+      setSelectedCompany(JSON.parse(savedCompany))
+    }
+  },[])
+  useEffect(()=>{
+    if(selectedCompany){
+      localStorage.setItem('selectedCompany',JSON.stringify(selectedCompany))
+    }
+  },[selectedCompany])
+
+
+
+
   return (
     <CompanyContext.Provider
       value={{
+        selectedCompany,
+        setSelectedCompany,
         createAddCompanyMutation,
         getCompanyLists,
         useGetSingleCompanyData,

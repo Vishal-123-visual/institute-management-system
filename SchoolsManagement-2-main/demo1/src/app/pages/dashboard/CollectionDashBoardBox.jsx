@@ -12,6 +12,7 @@ const CollectionDashBoardBox = ({className, chartSize = 70, chartLine = 11, char
   const chartRef = useRef(null)
   const {mode} = useThemeMode()
   const dayBookDataCtx = usePaymentOptionContextContext()
+  //console.log('daybookdatra',dayBookDataCtx.getDayBookDataQuery.data)
 
   const TotalIncome = dayBookDataCtx?.getDayBookDataQuery?.data?.reduce((acc, cur) => {
     return acc + cur.credit + cur.studentLateFees
@@ -93,6 +94,9 @@ const CollectionDashBoardBox = ({className, chartSize = 70, chartLine = 11, char
   }
 
   return (
+  <div>
+
+    {/* // main content  */}
     <div className={`card card-flush ${className}`}>
       <div className='card-header pt-5'>
         <div className='card-title d-flex flex-column'>
@@ -113,7 +117,7 @@ const CollectionDashBoardBox = ({className, chartSize = 70, chartLine = 11, char
               {Math.abs(profitLossPercentage).toFixed(2)}%
             </span>
           </div>
-          <span className='text-gray-400 pt-1 fw-semibold fs-6'>Over All Earnings</span>
+          <span className='text-gray-400 pt-1 fw-semibold fs-6'>Over All Earnings Of All Companies </span>
         </div>
       </div>
 
@@ -156,6 +160,8 @@ const CollectionDashBoardBox = ({className, chartSize = 70, chartLine = 11, char
         </div>
       </div>
     </div>
+  </div>
+
   )
 }
 
