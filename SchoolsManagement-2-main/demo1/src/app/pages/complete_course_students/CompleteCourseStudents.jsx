@@ -8,8 +8,10 @@ const BASE_URL_Image = `${BASE_URL}/api/images`
 
 const CompleteCourseStudents = () => {
   const studentCTX = useAdmissionContext();
+  const {getCompleteCourseStudentsLists} =  useAdmissionContext()
   const filteredStudents = studentCTX.getCompleteCourseStudentsLists?.data
-
+// console.log('comst',getCompleteCourseStudentsLists)
+// console.log('filtst',filteredStudents)     
   const companyCtx = useCompanyContext();
 
   const getSingleCompanyOfStudent = (companyId) => {

@@ -8,9 +8,15 @@ import {
 } from "../controllers/subject.controllers.js";
 import { isAdmin, requireSignIn } from "../middlewares/auth.middleware.js";
 import {
-  addCourseSubjectMarksController,
-  getCourseSubjectMarksController,
-  updateCourseSubjectMarksController,
+  // addCourseSubjectMarksController,
+  addCourseSubjectsToStudentController,
+  getAllCourseSubjectMarksController,
+  getCourseSubjectBasedOnCourseCategoryStudentController,
+  getCourseSubjectBasedOnStudentController,
+  updateStudentMultipleSubjectMarksController,
+  // getCourseSubjectMarksController,
+  // updateCourseSubjectMarksController,
+  updateStudentSubjectMarksController,
 } from "../controllers/StudentSubjectMarks.controllers.js";
 import { userModel } from "../models/user.models.js";
 import { sendEmail } from "../../helpers/sendRemainderFees/SendRemainderFeesStudent.js";
@@ -27,9 +33,30 @@ router
   .put(requireSignIn, isAdmin, updateCourseSubjectController)
   .delete(requireSignIn, isAdmin, deleteCourseSubjectController);
 
-router.post("/marks", addCourseSubjectMarksController);
-router.get("/marks/:studentId", getCourseSubjectMarksController);
-router.put("/marks/:studentId/:marksId", updateCourseSubjectMarksController);
+  router.get("/:courseId", getSubjectBasedOnCourseController);
+
+
+
+  router.post('/add',addCourseSubjectsToStudentController)
+  router.get('/marks/:studentId/:courseId',getCourseSubjectBasedOnStudentController)
+  router.get('/based-on-category/:studentId/:courseCategoryId',getCourseSubjectBasedOnCourseCategoryStudentController)
+  router.put('/marks',updateStudentSubjectMarksController)
+  router.put('/marks/bulk',updateStudentMultipleSubjectMarksController)
+  router.get('/marks',getAllCourseSubjectMarksController)
+// router.post("/marks", addCourseSubjectMarksController);
+// router.get("/marks/:studentId", getCourseSubjectMarksController);
+// // router.get("/marks/:studentId", getCourseSubjectBasedOnStudentController);
+// router.put("/marks/:studentId/:marksId", updateCourseSubjectMarksController);
+
+
+// router.post(
+//   "/add-on-subject",
+//   requireSignIn,
+//   studentAddOnCourseSubjectController
+// );
+
+// router.get("/all-add-on-subjects", getAllAddOnSubjectController);
+// get subject according to course
 
 router.post("/subject-mail", requireSignIn, async (req, res, next) => {
   try {
@@ -157,14 +184,5 @@ router.post("/subject-mail", requireSignIn, async (req, res, next) => {
     });
   }
 });
-// router.post(
-//   "/add-on-subject",
-//   requireSignIn,
-//   studentAddOnCourseSubjectController
-// );
-
-// router.get("/all-add-on-subjects", getAllAddOnSubjectController);
-// get subject according to course
-router.get("/:courseId", getSubjectBasedOnCourseController);
 
 export default router;

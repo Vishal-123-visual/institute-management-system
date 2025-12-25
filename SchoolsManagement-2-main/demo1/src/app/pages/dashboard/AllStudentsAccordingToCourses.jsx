@@ -64,7 +64,7 @@ const companyId = selectedCompany?._id
       </div>
 
       {/* Body (Scrollable List) */}
-      <div className='card-body pt-0' style={{maxHeight: '400px', overflowY: 'auto'}}>
+      <div className='card-body pt-0' style={{maxHeight: '550px', overflowY: 'auto'}}>
         {courseName.map((course) => {
           //console.log('corse',course)
           const { data: students = [], isLoading} = GetStudentsByCompanyAndCourse(companyId,course._id)

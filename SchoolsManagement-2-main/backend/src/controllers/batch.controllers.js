@@ -1,9 +1,13 @@
 import Batch from "../models/batch.model.js";
-import Teacher from "../models/teacher.model.js";
+// import Teacher from "../models/teacher.model.js";
 import BatchCategory from "../models/batchCategory.model.js";
 import { userModel as User } from "../models/user.models.js";
-import Subject from "../models/subject/subject.models.js";
+// import Subject from "../models/subject/subject.models.js";
 import admissionFormModel from "../models/addmission_form.models.js";
+import trainerFormModel from "../models/attendance/trainer.models.js";
+import SubjectModel from "../models/subject/subject.models.js";
+import CourseModel from "../models/course/courses.models.js";
+import categoryModel from "../models/course/category.model.js";
 
 // Register the AdmissionForm model
 const AdmissionForm = admissionFormModel;
@@ -13,48 +17,78 @@ export const createBatch = async (req, res) => {
   try {
     const {
       name,
-      category,
-      teacher,
+      courseCategory,
+      course,
+      trainer,
       startTime,
       endTime,
       startDate,
+      endDate,
       status,
-      students
+      students,
     } = req.body;
+    //console.log('body',req.body)
 
     // Validate required fields
-    if (!name || !teacher || !startTime || !endTime || !startDate || !students || !Array.isArray(students)) {
+    if (
+      !name ||
+      !courseCategory ||
+      !course ||
+      !trainer ||
+      !startTime ||
+      !endTime ||
+      !startDate ||
+      !endDate 
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields"
+        message: "Missing required fields",
       });
     }
 
     // Validate status if provided
-    if (status && !['completed', 'pending'].includes(status)) {
+    if (status && !["completed", "inProgress"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid status. Must be 'completed' or 'pending'"
+        message: "Invalid status. Must be 'completed' or 'inProgress'",
       });
     }
 
     // Validate category exists if provided
-    if (category) {
-      const categoryExists = await BatchCategory.findById(category);
-      if (!categoryExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Category not found"
-        });
-      }
+    // if (category) {
+    //   const categoryExists = await BatchCategory.findById(category);
+    //   if (!categoryExists) {
+    //     return res.status(404).json({
+    //       success: false,
+    //       message: "Category not found"
+    //     });
+    //   }
+    // }
+
+    // validate courseCategory exists 
+    const courseCategoryExists = await categoryModel.findById(courseCategory)
+    if(!courseCategoryExists){
+      return res.status(404).json({
+        success : false,
+        message : "Course Category not found"
+      })
+    }
+
+    // validate course exists 
+    const courseExists = await CourseModel.findById(course)
+    if(!courseExists){
+      return res.status(404).json({
+        success : false,
+        message : "Course not found"
+      })
     }
 
     // Validate teacher exists
-    const teacherExists = await Teacher.findById(teacher);
+    const teacherExists = await trainerFormModel.findById(trainer);
     if (!teacherExists) {
       return res.status(404).json({
         success: false,
-        message: "Teacher not found"
+        message: "trainer not found",
       });
     }
 
@@ -63,7 +97,7 @@ export const createBatch = async (req, res) => {
     if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid time format. Use HH:MM format"
+        message: "Invalid time format. Use HH:MM format",
       });
     }
 
@@ -72,7 +106,8 @@ export const createBatch = async (req, res) => {
       if (!student.student || !student.currentSoftware) {
         return res.status(400).json({
           success: false,
-          message: "Invalid student data. Student ID and current software are required"
+          message:
+            "Invalid student data. Student ID and current software are required",
         });
       }
 
@@ -81,39 +116,41 @@ export const createBatch = async (req, res) => {
       if (!studentExists) {
         return res.status(404).json({
           success: false,
-          message: `Student with ID ${student.student} not found`
+          message: `Student with ID ${student.student} not found`,
         });
       }
     }
 
     // Check for timing conflicts
     const existingBatch = await Batch.findOne({
-      teacher,
+      trainer,
       $or: [
         {
           startTime: { $lt: endTime },
-          endTime: { $gt: startTime }
-        }
+          endTime: { $gt: startTime },
+        },
       ],
-      isActive: true
+      isActive: true,
     });
 
     if (existingBatch) {
       return res.status(400).json({
         success: false,
-        message: "Teacher has a scheduling conflict with another batch"
+        message: "Trainer has a scheduling conflict with another batch",
       });
     }
 
     const batch = new Batch({
       name,
-      category,
-      teacher,
+      courseCategory,
+      course,
+      trainer,
       startTime,
       endTime,
       startDate,
+      endDate,
       status,
-      students
+      students,
     });
 
     await batch.save();
@@ -121,12 +158,12 @@ export const createBatch = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Batch created successfully",
-      data: batch
+      data: batch,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -134,32 +171,26 @@ export const createBatch = async (req, res) => {
 // Get all batches with filters
 export const getAllBatches = async (req, res) => {
   try {
-    const { 
-      teacher, 
-      isActive, 
-      startDate, 
-      endDate
-    } = req.query;
+    const { trainer, isActive, startDate, endDate } = req.query;
 
     const query = {};
 
-    if (teacher) query.teacher = teacher;
-    if (isActive !== undefined) query.isActive = isActive === 'true';
+    if (trainer) query.trainer = trainer;
+    if (isActive !== undefined) query.isActive = isActive === "true";
     if (startDate) query.startDate = { $gte: new Date(startDate) };
     if (endDate) query.endDate = { $lte: new Date(endDate) };
 
     const batches = await Batch.find(query)
-      .populate('teacher', 'name email phone')
-      .populate('category', 'categoryName')
+      .populate("trainer", "trainerName trainerEmail")
       .populate({
-        path: 'students.student',
-        model: 'Students',
-        select: 'name courseName',
+        path: "students.student",
+        model: "Students",
+        select: "name courseName",
         populate: {
-          path: 'courseName',
-          model: 'Course',
-          select: 'courseName'
-        }
+          path: "courseName",
+          model: "Course",
+          select: "courseName",
+        },
       })
       .lean()
       .sort({ startDate: -1 });
@@ -167,22 +198,24 @@ export const getAllBatches = async (req, res) => {
     // Get subjects for each student's course
     for (const batch of batches) {
       for (const batchStudent of batch.students) {
-        const subjects = await Subject.find({
-          course: batchStudent.student.courseName._id
-        }).select('subjectName').lean();
-        
+        const subjects = await SubjectModel.find({
+          course: batchStudent.student.courseName._id,
+        })
+          .select("subjectName")
+          .lean();
+
         batchStudent.student.subjects = subjects;
       }
     }
 
     res.status(200).json({
       success: true,
-      data: batches
+      data: batches,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -191,24 +224,25 @@ export const getAllBatches = async (req, res) => {
 export const getBatchById = async (req, res) => {
   try {
     const batch = await Batch.findById(req.params.id)
-      .populate('teacher', 'name email phone')
-      .populate('category', 'categoryName');
+      .populate("trainer", "trainerName trainerEmail")
+      .populate("students.student", "name email date_of_joining courseduration")
+      .populate("students.subjects.subject","subjectName");
 
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: batch
+      data: batch,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -217,12 +251,12 @@ export const getBatchById = async (req, res) => {
 export const addStudentToBatch = async (req, res) => {
   try {
     const { batchId } = req.params;
-    const { studentId, subjects } = req.body;
+    const { studentId, subjects, currentSoftware } = req.body;
 
     if (!studentId || !subjects || !Array.isArray(subjects)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid request data"
+        message: "Invalid request data",
       });
     }
 
@@ -230,23 +264,29 @@ export const addStudentToBatch = async (req, res) => {
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
-    if (batch.isFull()) {
-      return res.status(400).json({
-        success: false,
-        message: "Batch is full"
-      });
-    }
+    //console.log("batch", batch);
+    // if (batch.isFull()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Batch is full"
+    //   });
+    // }
 
     // Validate student exists
-    const student = await User.findOne({ _id: studentId, role: 'student' });
+    //console.log('studentId',studentId)
+    // const student = await User.findOne({
+    //   studentId: studentId,
+    //   // role: "Student",
+    // });
+    const student = await User.findById(studentId) || await admissionFormModel.findById(studentId)
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found"
+        message: "Student not found",
       });
     }
 
@@ -254,46 +294,52 @@ export const addStudentToBatch = async (req, res) => {
     if (batch.hasStudent(studentId)) {
       return res.status(400).json({
         success: false,
-        message: "Student is already in this batch"
+        message: "Student is already in this batch",
       });
     }
 
     // Validate subjects exist
     for (const subject of subjects) {
-      const subjectExists = await Subject.findById(subject.subject);
+      console.log("subject received:", subject);
+      console.log("subject.subject value:", subject.subject);
+      const subjectExists = await SubjectModel.findById(
+        subject.subject || subject
+      );
       if (!subjectExists) {
         return res.status(404).json({
           success: false,
-          message: `Subject with ID ${subject.subject} not found`
+          message: `Subject with ID ${subject.subject} not found`,
         });
       }
     }
 
+    console.log("first");
     batch.students.push({
       student: studentId,
-      subjects: subjects.map(subject => ({
+      currentSoftware: currentSoftware,
+      subjects: subjects.map((subject) => ({
         ...subject,
-        startDate: new Date()
-      }))
+        startDate: new Date(),
+      })),
     });
 
     batch.currentStrength += 1;
     await batch.save();
 
     const updatedBatch = await Batch.findById(batchId)
-      .populate('teacher', 'name email phone')
-      .populate('students.student', 'name email')
-      .populate('students.subjects.subject', 'name');
+      .populate("trainer", "trainerName trainerEmail")
+      .populate("students.student", "name email")
+      .populate("students.subjects.subject", "subjectName");
 
     res.status(200).json({
       success: true,
       message: "Student added to batch successfully",
-      data: updatedBatch
+      data: updatedBatch,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -304,10 +350,10 @@ export const updateStudentSubjectStatus = async (req, res) => {
     const { batchId, studentId, subjectId } = req.params;
     const { status, progress, notes } = req.body;
 
-    if (!status || !['pending', 'in_progress', 'completed'].includes(status)) {
+    if (!status || !["inProgress", "completed"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid status value"
+        message: "Invalid status value",
       });
     }
 
@@ -315,27 +361,27 @@ export const updateStudentSubjectStatus = async (req, res) => {
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     const studentInBatch = batch.students.find(
-      s => s.student.toString() === studentId
+      (s) => s.student.toString() === studentId
     );
     if (!studentInBatch) {
       return res.status(404).json({
         success: false,
-        message: "Student not found in batch"
+        message: "Student not found in batch",
       });
     }
 
     const subject = studentInBatch.subjects.find(
-      s => s.subject.toString() === subjectId
+      (s) => s.subject.toString() === subjectId || s._id.toString() === subjectId
     );
     if (!subject) {
       return res.status(404).json({
         success: false,
-        message: "Subject not found for student"
+        message: "Subject not found for student",
       });
     }
 
@@ -344,13 +390,13 @@ export const updateStudentSubjectStatus = async (req, res) => {
       if (progress < 0 || progress > 100) {
         return res.status(400).json({
           success: false,
-          message: "Progress must be between 0 and 100"
+          message: "Progress must be between 0 and 100",
         });
       }
       subject.progress = progress;
     }
     if (notes) subject.notes = notes;
-    if (status === 'completed') {
+    if (status === "completed") {
       subject.completionDate = new Date();
       subject.progress = 100;
     }
@@ -358,19 +404,19 @@ export const updateStudentSubjectStatus = async (req, res) => {
     await batch.save();
 
     const updatedBatch = await Batch.findById(batchId)
-      .populate('teacher', 'name email phone')
-      .populate('students.student', 'name email')
-      .populate('students.subjects.subject', 'name');
+      .populate("trainer", "trainerName trainerEmail")
+      .populate("students.student", "name email")
+      .populate("students.subjects.subject", "subjectName");
 
     res.status(200).json({
       success: true,
       message: "Subject status updated successfully",
-      data: updatedBatch
+      data: updatedBatch,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -384,17 +430,17 @@ export const removeStudentFromBatch = async (req, res) => {
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     const studentIndex = batch.students.findIndex(
-      s => s.student.toString() === studentId
+      (s) => s.student.toString() === studentId
     );
     if (studentIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: "Student not found in batch"
+        message: "Student not found in batch",
       });
     }
 
@@ -403,19 +449,19 @@ export const removeStudentFromBatch = async (req, res) => {
     await batch.save();
 
     const updatedBatch = await Batch.findById(batchId)
-      .populate('teacher', 'name email phone')
-      .populate('students.student', 'name email')
-      .populate('students.subjects.subject', 'name');
+      .populate("trainer", "trainerName trainerEmail")
+      .populate("students.student", "name email")
+      .populate("students.subjects.subject", "subjectName");
 
     res.status(200).json({
       success: true,
       message: "Student removed from batch successfully",
-      data: updatedBatch
+      data: updatedBatch,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -424,42 +470,62 @@ export const removeStudentFromBatch = async (req, res) => {
 export const updateBatch = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      category,
-      teacher,
-      startTime,
-      endTime,
-      startDate,
-      status,
-      students
-    } = req.body;
+    const { name,courseCategory, course, trainer, startTime, endTime, startDate, status, students } =
+      req.body;
 
     // Validate required fields
-    if (!name || !teacher || !startTime || !endTime || !startDate || !students || !Array.isArray(students)) {
+    if (
+      !name ||
+      !courseCategory ||
+      !course ||
+      !trainer ||
+      !startTime ||
+      !endTime ||
+      !startDate ||
+      !students ||
+      !Array.isArray(students)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields"
+        message: "Missing required fields",
       });
     }
 
     // Validate category exists if provided
-    if (category) {
-      const categoryExists = await BatchCategory.findById(category);
-      if (!categoryExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Category not found"
-        });
-      }
+    // if (category) {
+    //   const categoryExists = await BatchCategory.findById(category);
+    //   if (!categoryExists) {
+    //     return res.status(404).json({
+    //       success: false,
+    //       message: "Category not found"
+    //     });
+    //   }
+    // }
+
+       // validate courseCategory exists 
+    const courseCategoryExists = await categoryModel.findById(courseCategory)
+    if(!courseCategoryExists){
+      return res.status(404).json({
+        success : false,
+        message : "Course Category not found"
+      })
+    }
+
+       // validate course exists 
+    const courseExists = await CourseModel.findById(course)
+    if(!courseExists){
+      return res.status(404).json({
+        success : false,
+        message : "Course not found"
+      })
     }
 
     // Validate teacher exists
-    const teacherExists = await Teacher.findById(teacher);
+    const teacherExists = await trainerFormModel.findById(trainer);
     if (!teacherExists) {
       return res.status(404).json({
         success: false,
-        message: "Teacher not found"
+        message: "Trainer not found",
       });
     }
 
@@ -468,7 +534,7 @@ export const updateBatch = async (req, res) => {
     if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid time format. Use HH:MM format"
+        message: "Invalid time format. Use HH:MM format",
       });
     }
 
@@ -477,7 +543,8 @@ export const updateBatch = async (req, res) => {
       if (!student.student || !student.currentSoftware) {
         return res.status(400).json({
           success: false,
-          message: "Invalid student data. Student ID and current software are required"
+          message:
+            "Invalid student data. Student ID and current software are required",
         });
       }
 
@@ -486,36 +553,36 @@ export const updateBatch = async (req, res) => {
       if (!studentExists) {
         return res.status(404).json({
           success: false,
-          message: `Student with ID ${student.student} not found`
+          message: `Student with ID ${student.student} not found`,
         });
       }
     }
 
     // Validate status if provided
-    if (status && !['completed', 'pending'].includes(status)) {
+    if (status && !["completed", "pending"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid status. Must be 'completed' or 'pending'"
+        message: "Invalid status. Must be 'completed' or 'pending'",
       });
     }
 
     // Check for timing conflicts (excluding current batch)
     const existingBatch = await Batch.findOne({
       _id: { $ne: id },
-      teacher,
+      trainer,
       $or: [
         {
           startTime: { $lt: endTime },
-          endTime: { $gt: startTime }
-        }
+          endTime: { $gt: startTime },
+        },
       ],
-      isActive: true
+      isActive: true,
     });
 
     if (existingBatch) {
       return res.status(400).json({
         success: false,
-        message: "Teacher has a scheduling conflict with another batch"
+        message: "Trainer has a scheduling conflict with another batch",
       });
     }
 
@@ -523,40 +590,41 @@ export const updateBatch = async (req, res) => {
       id,
       {
         name,
-        category,
-        teacher,
+        courseCategory,
+        course,
+        trainer,
         startTime,
         endTime,
         startDate,
         status,
-        students
+        students,
       },
       { new: true }
     )
-    .populate('teacher', 'name email phone')
-    .populate('category', 'categoryName')
-    .populate({
-      path: 'students.student',
-      model: 'Students',
-      select: 'name courseName'
-    });
+      .populate("trainer", "trainerName trainerEmail")
+      // .populate('category', 'categoryName')
+      .populate({
+        path: "students.student",
+        model: "Students",
+        select: "name courseName",
+      });
 
     if (!updatedBatch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     res.status(200).json({
       success: true,
       message: "Batch updated successfully",
-      data: updatedBatch
+      data: updatedBatch,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -568,7 +636,7 @@ export const deleteBatch = async (req, res) => {
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
@@ -576,12 +644,12 @@ export const deleteBatch = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Batch deleted successfully"
+      message: "Batch deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -592,47 +660,47 @@ export const getStudentProgress = async (req, res) => {
     const { batchId, studentId } = req.params;
 
     const batch = await Batch.findById(batchId)
-      .populate('students.student', 'name email')
-      .populate('students.subjects.subject', 'name');
+      .populate("students.student", "name email")
+      .populate("students.subjects.subject", "subjectName startDate completionDate");
 
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     const student = batch.students.find(
-      s => s.student._id.toString() === studentId
+      (s) => s.student._id.toString() === studentId
     );
 
     if (!student) {
       return res.status(404).json({
         success: false,
-        message: "Student not found in batch"
+        message: "Student not found in batch",
       });
     }
 
     const progress = {
       student: student.student,
-      subjects: student.subjects.map(subject => ({
+      subjects: student.subjects.map((subject) => ({
         subject: subject.subject,
         status: subject.status,
         progress: subject.progress,
         startDate: subject.startDate,
         completionDate: subject.completionDate,
-        notes: subject.notes
-      }))
+        notes: subject.notes,
+      })),
     };
 
     res.status(200).json({
       success: true,
-      data: progress
+      data: progress,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -642,12 +710,13 @@ export const updateBatchStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+    console.log('status',status)
 
     // Validate status
-    if (!status || !['completed', 'pending'].includes(status)) {
+    if (!status || !["completed", "inProgress"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid status. Must be 'completed' or 'pending'"
+        message: "Invalid status. Must be 'completed' or 'inProgress'",
       });
     }
 
@@ -656,47 +725,45 @@ export const updateBatchStatus = async (req, res) => {
     if (!batch) {
       return res.status(404).json({
         success: false,
-        message: "Batch not found"
+        message: "Batch not found",
       });
     }
 
     // Prepare update data
     const updateData = { status };
-    
+
     // If status is being set to completed, set the endDate to current date
-    if (status === 'completed' && batch.status !== 'completed') {
+    if (status === "completed" && batch.status !== "completed") {
       updateData.endDate = new Date();
     }
-    
+
     // If status is being changed back to pending, remove the endDate
-    if (status === 'pending' && batch.status === 'completed') {
+    if (status === "inProgress" && batch.status === "completed") {
       updateData.endDate = null;
     }
 
     // Update batch status and endDate
-    const updatedBatch = await Batch.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    )
-    .populate('teacher', 'name email phone')
-    .populate('category', 'categoryName')
-    .populate({
-      path: 'students.student',
-      model: 'Students',
-      select: 'name courseName'
-    });
+    const updatedBatch = await Batch.findByIdAndUpdate(id, updateData, {
+      new: true,
+    })
+      .populate("trainer", "trainerName trainerEmail")
+      // .populate('category', 'categoryName')
+      .populate({
+        path: "students.student",
+        model: "Students",
+        select: "name courseName",
+      });
 
     res.status(200).json({
       success: true,
       message: `Batch status updated to ${status}`,
-      data: updatedBatch
+      data: updatedBatch,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error updating batch status",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -704,33 +771,33 @@ export const updateBatchStatus = async (req, res) => {
 // Get pending batches (for Super Admin)
 export const getPendingBatches = async (req, res) => {
   try {
-    const pendingBatches = await Batch.find({ $or: [{ status: 'pending' },
-      { status: { $exists: false } }
-    ] })
-      .populate('teacher', 'name email phone')
-      .populate('category', 'categoryName')
+    const pendingBatches = await Batch.find({
+      $or: [{ status: "inProgress" }, { status: { $exists: false } }],
+    })
+      .populate("trainer", "trainerName trainerEmail")
+      // .populate('category', 'categoryName')
       .populate({
-        path: 'students.student',
-        model: 'Students',
-        select: 'name courseName',
+        path: "students.student",
+        model: "Students",
+        select: "name courseName",
         populate: {
-          path: 'courseName',
-          model: 'Course',
-          select: 'courseName'
-        }
+          path: "courseName",
+          model: "Course",
+          select: "courseName",
+        },
       })
       .lean()
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      data: pendingBatches
+      data: pendingBatches,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching pending batches",
-      error: error.message
+      error: error.message,
     });
   }
-}; 
+};

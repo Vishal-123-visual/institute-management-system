@@ -61,8 +61,10 @@ import ViewAllEnquiryFormsData from '../pages/enquiry-related/viewEnquiryFormsDa
 import AddEnquiryForm from '../pages/enquiry-related/viewEnquiryFormsData/AddEnquiryForm'
 import ProfileForm from '../pages/enquiry-related/dynamicForms/ProfileForm'
 import TrainersList from '../pages/attendance-related/Trainers/TrainersList'
+import TeachersList from '../pages/teachers/TeachersList'
 import LabsList from '../pages/attendance-related/Labs/LabsList'
 import BatchForm from '../pages/attendance-related/Batches/BatchForm'
+import BatchManagement from '../pages/attendance-related/Batches/BatchManagement'
 import TimingList from '../pages/attendance-related/Timings/TimingLists'
 import MonthlyReportsDashBoard from '../pages/monthly_Reports/MonthlyReportsDashBoard'
 import TodoCalendarRemainder from '../pages/enquiry-related/viewEnquiryFormsData/TodoCalendarRemainder'
@@ -335,10 +337,11 @@ const PrivateRoutes = () => {
             {/* <Route path='/student/:id' element={<StudentProfileDetailsPage />} /> */}
             {/* <----------------- Attendance Related Routes Starts Here ------------------> */}
             <Route path='/add-trainer/:id' element={<TrainersList />} />
+            <Route path='/add-teacher/:id' element={<TeachersList />} />
             <Route path='/add-lab/:id' element={<LabsList />} />
-            <Route path='/add-batch/:id' element={<BatchForm />} />
+            <Route path='/add-batch/:id' element={<BatchManagement />} />
             <Route path='/add-timing/:id' element={<TimingList />} />
-            {/* <------------------- Monthly Reports Routes Starts Here -------------------> */}
+            {/* <------------------- Monthly Reports Routes Starts Here -------------------> */}  
             <Route
               path='/monthly-reports/:id'
               element={

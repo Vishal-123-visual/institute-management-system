@@ -3,7 +3,7 @@ import axios from 'axios'
 import {useQueryClient, useMutation, useQuery} from 'react-query'
 import {useAuth} from '../../modules/auth'
 
-const CourseContext = createContext()
+const CourseContext = createContext() 
 
 const BASE_URL = process.env.REACT_APP_BASE_URL
 

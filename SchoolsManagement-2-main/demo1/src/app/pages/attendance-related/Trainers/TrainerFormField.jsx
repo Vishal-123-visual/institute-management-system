@@ -4,6 +4,7 @@ import {useAttendanceContext} from '../AttendanceContext'
 import {useLocation, useParams} from 'react-router-dom'
 import {useFormik} from 'formik'
 import * as Yup from 'yup'
+import { toast } from 'react-toastify'
 
 const BASE_URL = process.env.REACT_APP_BASE_URL
 const BASE_URL_Image = `${BASE_URL}/api/images`
@@ -49,6 +50,7 @@ const TrainerFormField = ({setOpenModal}) => {
           setOpenModal(false)
         },
         onError: (error) => {
+          toast.error(error?.response?.data?.message || 'Failed to create') 
           console.error('Error saving trainer data:', error)
         },
       })

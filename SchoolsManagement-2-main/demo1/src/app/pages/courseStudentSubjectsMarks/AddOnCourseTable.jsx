@@ -87,6 +87,28 @@ const AddOnCourseTable = ({
       subject?.studentInfo === location?.state?._id
   )
 
+  localStorage.setItem(
+  'student-result',
+  JSON.stringify({
+    state: {
+      courseType: YearandSemesterSets[activeTab - 1],
+      data: studentSubjectMarksData,
+      studentData: studentData,
+    },
+  })
+)
+
+localStorage.setItem(
+  'print-student-result',
+  JSON.stringify({
+    state: {
+      courseType: YearandSemesterSets[activeTab - 1],
+      data: studentSubjectMarksData,
+      studentData: studentData,
+    },
+  })
+)
+
   // console.log(filteredData)
   // console.log(location)
 

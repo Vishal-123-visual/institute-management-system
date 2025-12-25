@@ -167,9 +167,25 @@ const SidebarMenuMain = () => {
                       />
                     </SidebarMenuItemWithSub>
                   </SidebarMenuItemWithSub>
+
                   {/* <SidebarMenuItemWithSub
                     to='/apps/chat'
                     title={'Attendance'}
+                    fontIcon='bi-chat-left'
+                    icon='message-text-2'
+                  >
+                    
+                    <SidebarMenuItem
+                      to={`/add-lab/${CompanyListData?._id}`}
+                      title='Add Labs'
+                      hasBullet={true}
+                    />
+                
+                  </SidebarMenuItemWithSub> */}
+
+                  <SidebarMenuItemWithSub
+                    to='/apps/chat'
+                    title={'Batch'}
                     fontIcon='bi-chat-left'
                     icon='message-text-2'
                   >
@@ -178,17 +194,24 @@ const SidebarMenuMain = () => {
                       title='Add Trainers'
                       hasBullet={true}
                     />
-                    <SidebarMenuItem
-                      to={`/add-lab/${CompanyListData?._id}`}
-                      title='Add Labs'
-                      hasBullet={true}
-                    />
+                  
                     <SidebarMenuItem
                       to={`/add-batch/${CompanyListData?._id}`}
                       title='Add Batches'
                       hasBullet={true}
                     />
-                  </SidebarMenuItemWithSub> */}
+                    {/* <SidebarMenuItem
+                      to={`/add-teacher/${CompanyListData?._id}`}
+                      title='Add Teachers'
+                      hasBullet={true}
+                    /> */}
+                    <SidebarMenuItem
+                      to={`/add-timing/${CompanyListData?._id}`}
+                      title='Add Timings'
+                      hasBullet={true}
+                    />
+                  </SidebarMenuItemWithSub>
+
                   <SidebarMenuItemWithSub
                     to='/apps/chat'
                     title={'Reports'}

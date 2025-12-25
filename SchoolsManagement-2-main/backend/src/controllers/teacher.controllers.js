@@ -89,14 +89,12 @@ export const updateTeacher = async (req, res) => {
 export const deleteTeacher = async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
-    
     if (!teacher) {
       return res.status(404).json({
         success: false,
         message: "Teacher not found"
       });
     }
-    
     res.status(200).json({
       success: true,
       message: "Teacher deleted successfully"

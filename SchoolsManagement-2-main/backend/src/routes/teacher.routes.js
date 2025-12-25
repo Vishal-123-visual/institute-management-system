@@ -24,4 +24,4 @@ router.put("/:id", updateTeacher);
 // Delete teacher
 router.delete("/:id", deleteTeacher);
 
-export default router; 
+export default router;  

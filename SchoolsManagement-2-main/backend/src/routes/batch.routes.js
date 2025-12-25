@@ -6,7 +6,11 @@ import {
   updateBatch,
   deleteBatch,
   updateBatchStatus,
-  getPendingBatches
+  getPendingBatches,
+  addStudentToBatch,
+  removeStudentFromBatch,
+  getStudentProgress,
+  updateStudentSubjectStatus
 } from "../controllers/batch.controllers.js";
 import { requireSignIn, isAdmin } from "../middlewares/auth.middleware.js";
 
@@ -36,4 +40,16 @@ router.patch("/:id/status", isAdmin, updateBatchStatus);
 // Delete batch
 router.delete("/:id", deleteBatch);
 
-export default router;
+// add student to a batch 
+router.post('/:batchId/student',addStudentToBatch)
+
+// remove or delete student from batch
+router.delete('/:batchId/student/:studentId',removeStudentFromBatch)
+
+// get student's progress in a batch
+router.get('/:batchId/student/:studentId/progress',getStudentProgress)
+
+// update student subject status
+router.put('/:batchId/student/:studentId/subject/:subjectId',updateStudentSubjectStatus)
+
+export default router; 

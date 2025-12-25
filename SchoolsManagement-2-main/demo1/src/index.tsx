@@ -35,6 +35,8 @@ import {DynamicFieldContextProvider} from './app/pages/enquiry-related/DynamicFi
 import {CustomFormFieldDataContextProvider} from './app/pages/enquiry-related/dynamicForms/CustomFormFieldDataContext'
 import {AttendanceContextProvider} from './app/pages/attendance-related/AttendanceContext'
 import {UserRoleAccessProvider} from './app/pages/userRoleAccessManagement/UserRoleAccessContext'
+import {TeacherProvider} from './app/pages/teachers/TeacherContext'
+import { BatchProvider } from './app/pages/batch/BatchContext'
 
 setupAxios(axios)
 Chart.register(...registerables)
@@ -59,7 +61,11 @@ if (container) {
                               <StudentCourseFeesContextProvider>
                                 <PaymentOptionContextProvider>
                                   <CompanyContextProvider>
-                                    <AppRoutes />
+                                    <TeacherProvider>
+                                      <BatchProvider>
+                                      <AppRoutes />
+                                      </BatchProvider>
+                                    </TeacherProvider>
                                   </CompanyContextProvider>
                                 </PaymentOptionContextProvider>
                               </StudentCourseFeesContextProvider>
