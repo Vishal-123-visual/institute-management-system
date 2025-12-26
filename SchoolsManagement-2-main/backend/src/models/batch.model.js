@@ -42,7 +42,6 @@ const studentSchema = new mongoose.Schema({
   ],
   currentSoftware: {
     type: String,
-    required: true,
     trim: true,
   },
 });
@@ -62,12 +61,12 @@ const batchSchema = new mongoose.Schema(
     courseCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
+      
     },
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
-      required: true,
+     
     },
     trainer: {
       type: mongoose.Schema.Types.ObjectId,

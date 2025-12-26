@@ -240,14 +240,14 @@ export const getCourseSubjectBasedOnStudentController = asyncHandler(
   }
 );
 
-// GET STUDENT SUBJECTS BASED ON CATEGORY WITH MARKS (Student-wise)
+// GET STUDENT SUBJECTS BASED ON STUDENT ID WITH MARKS (Student-wise)
 export const getCourseSubjectBasedOnCourseCategoryStudentController = asyncHandler(
   async (req, res) => {
-    const { studentId, courseCategoryId } = req.params;
+    const { studentId } = req.params;
     //console.log('sub1', studentId,courseCategoryId)
 
     const data = await studentSubjectMarksModel
-      .find({ studentInfo: studentId, courseCategory: courseCategoryId, })
+      .find({ studentInfo: studentId })
       .populate("studentInfo", "name rollNumber")
       .populate("course", "courseName")
       .populate("subjects.subject", "_id subjectName subjectCode fullMarks passMarks");

@@ -9,8 +9,8 @@ import { useGetCourseCategoryContextContext } from '../../course/category/Course
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Batch name is required').min(3, 'Batch name must be at least 3 characters'),
-  courseCategory: Yup.string().required('Course Category is required'),
-  course: Yup.string().required('Course is required'),
+  // courseCategory: Yup.string().required('Course Category is required'),
+  // course: Yup.string().required('Course is required'),
   trainer: Yup.string().required('Trainer is required'),
   category: Yup.string(),
   startTime: Yup.string().required('Start time is required'),
@@ -65,8 +65,8 @@ const CreateBatchForm = ({ batch, companyId, isEdit = false, onSuccess }) => {
     // },
     initialValues: {
   name: editData?.name || '',
-  courseCategory: editData?.courseCategory || '',
-  course: editData?.course || '',
+  // courseCategory: editData?.courseCategory || '',
+  // course: editData?.course || '',
   trainer: editData?.trainer?._id || '',
   category: editData?.category?._id || '',
   startTime: editData?.startTime || '',
@@ -128,12 +128,12 @@ const CreateBatchForm = ({ batch, companyId, isEdit = false, onSuccess }) => {
     }
   })
 
-  const availableCourses = getCourseLists?.data?.filter((course)=> course.category._id === formik.values.courseCategory) || []
-console.log('abaicours',availableCourses)
+//   const availableCourses = getCourseLists?.data?.filter((course)=> course.category._id === formik.values.courseCategory) || []
+// console.log('abaicours',availableCourses)
 
   //console.log('alltimings', getAllBatchTimings.data)
   //console.log('allcourse', getCourseLists.data)
-  console.log('allcoursecategory', getCourseCategoryLists?.data)
+  //console.log('allcoursecategory', getCourseCategoryLists?.data)
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -157,7 +157,7 @@ console.log('abaicours',availableCourses)
       </div>
 
        {/* course category  */}
-      <div className='row mb-6'>
+      {/* <div className='row mb-6'>
         <label className='col-12 col-form-label required fw-bold fs-6'>
           Course Category
         </label>
@@ -167,7 +167,7 @@ console.log('abaicours',availableCourses)
               formik.touched.courseCategory && formik.errors.courseCategory ? 'is-invalid' : ''
             }`}
             {...formik.getFieldProps('courseCategory')}
-            // onChange={(e)=> setSelectedCourseCategory(e.target.value)}
+            
           >
             <option value='' hidden>Select Course Category</option>
             {getCourseCategoryLists?.data?.map(c => (
@@ -180,10 +180,10 @@ console.log('abaicours',availableCourses)
             <div className='invalid-feedback'>{formik.errors.courseCategory}</div>
           )}
         </div>
-      </div>
+      </div> */}
 
        {/* course   */}
-      <div className='row mb-6'>
+      {/* <div className='row mb-6'>
         <label className='col-12 col-form-label required fw-bold fs-6'>
           Course 
         </label>
@@ -205,7 +205,7 @@ console.log('abaicours',availableCourses)
             <div className='invalid-feedback'>{formik.errors.course}</div>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Trainer  */}
       <div className='row mb-6'>

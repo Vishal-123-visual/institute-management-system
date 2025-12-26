@@ -59,17 +59,17 @@ export const CourseSubjectContextProvider = ({children}) => {
   /* ==============================
      GET STUDENT SUBJECTS (Student + Course)
   ============================== */
-  const useGetStudentSubjectsBasedOnCategory = (studentId, courseCategoryId) => {
+  const useGetStudentSubjectsBasedOnCategory = (studentId) => {
     return useQuery({
-      queryKey: ['studentSubjectsBasedOnCategory', studentId, courseCategoryId],
+      queryKey: ['studentSubjectsBasedOnCategory', studentId],
       queryFn: () =>
         axios
-          .get(`${BASE_URL}/api/subjects/based-on-category/${studentId}/${courseCategoryId}`, config)
+          .get(`${BASE_URL}/api/subjects/based-on-student/${studentId}`, config)
           .then((res) => {
             //console.log(res.data)
             return res.data
           }),
-      enabled: !!studentId && !!courseCategoryId,
+      enabled: !!studentId,
     })
   }
 

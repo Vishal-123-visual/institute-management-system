@@ -32,8 +32,8 @@ export const createBatch = async (req, res) => {
     // Validate required fields
     if (
       !name ||
-      !courseCategory ||
-      !course ||
+      // !courseCategory ||
+      // !course ||
       !trainer ||
       !startTime ||
       !endTime ||
@@ -66,22 +66,22 @@ export const createBatch = async (req, res) => {
     // }
 
     // validate courseCategory exists 
-    const courseCategoryExists = await categoryModel.findById(courseCategory)
-    if(!courseCategoryExists){
-      return res.status(404).json({
-        success : false,
-        message : "Course Category not found"
-      })
-    }
+    // const courseCategoryExists = await categoryModel.findById(courseCategory)
+    // if(!courseCategoryExists){
+    //   return res.status(404).json({
+    //     success : false,
+    //     message : "Course Category not found"
+    //   })
+    // }
 
-    // validate course exists 
-    const courseExists = await CourseModel.findById(course)
-    if(!courseExists){
-      return res.status(404).json({
-        success : false,
-        message : "Course not found"
-      })
-    }
+    // // validate course exists 
+    // const courseExists = await CourseModel.findById(course)
+    // if(!courseExists){
+    //   return res.status(404).json({
+    //     success : false,
+    //     message : "Course not found"
+    //   })
+    // }
 
     // Validate teacher exists
     const teacherExists = await trainerFormModel.findById(trainer);
@@ -191,6 +191,10 @@ export const getAllBatches = async (req, res) => {
           model: "Course",
           select: "courseName",
         },
+      })
+       .populate({
+        path: "students.subjects.subject",
+        select: "subjectName",
       })
       .lean()
       .sort({ startDate: -1 });

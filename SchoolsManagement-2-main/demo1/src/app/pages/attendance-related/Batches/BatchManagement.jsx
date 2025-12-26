@@ -177,7 +177,7 @@ const BatchManagement = () => {
 
             {activeTab === 'report' &&  (
               <BatchReport
-                batch={batches}
+                batches={batches}
                 onBack={() => {
                   setActiveTab('list')
                   setSelectedBatch(null)

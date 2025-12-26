@@ -4,37 +4,35 @@ import {useEffect, useState} from 'react'
 import {useBatchContext} from '../../batch/BatchContext'
 import {useAdmissionContext} from '../../../modules/auth/core/Addmission'
 import {useCourseSubjectContext} from '../../course/course_subject/CourseSubjectContext'
-import { useParams } from 'react-router-dom'
-import { useQueryClient } from 'react-query'
-import { toast } from 'react-toastify'
+import {useQueryClient} from 'react-query'
+import {toast} from 'react-toastify'
+import Select from 'react-select'
 
 const validationSchema = Yup.object().shape({
   student: Yup.string().required('Student is required'),
-  currentSoftware: Yup.string().required('Current software is required'),
+  // currentSoftware: Yup.string().required('Current software is required'),
   subject: Yup.array().min(1, 'Select at least one subject').required(),
 })
 
 const AddStudentToBatchForm = ({batch, onSuccess}) => {
   const [existingStudents, setExistingStudents] = useState()
-  const {useAddStudentToBatch} = useBatchContext()
-  const {studentsLists,GetStudentsByCompanyAndCourse} = useAdmissionContext()
+  const {useAddStudentToBatch,useGetALLbatches} = useBatchContext()
+  const {studentsLists} = useAdmissionContext()
   const addStudentMutation = useAddStudentToBatch()
   const ctx = useCourseSubjectContext()
   const queryClient = useQueryClient()
-  const [selectedStudentId,setSelectedStudentId] = useState(null)
-  // console.log('first', subjects)
+  const { data: allBatchesData } = useGetALLbatches({})
+const allBatches = allBatchesData?.data || []
 
 
-  const courseCategoryId = batch?.courseCategory
-
-  //console.log('batch',batch)
+  //console.log('batch', allBatches)
   //console.log('id',selectedStudentId)
-  // filter subjects by courseId 
 
-  // const subjects = ctx.getCourseSubjectLists?.data?.filter((sub)=> sub.course === courseId || sub.course?._id === courseId) || []
+  // filter students by courseId
+  const allStudents = studentsLists.data.users
+  
 
-  // filter students by courseId 
-  const allStudents = studentsLists.data.users?.filter((stu)=> stu.courseName.category ===courseCategoryId) || []
+  // const allStudents = studentsLists.data.users?.filter((stu)=> stu.courseName.category ===courseCategoryId) || []
   // console.log('filter',allStudents)
   useEffect(() => {
     if (batch?.students) {
@@ -44,6 +42,10 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
   const availableStudents =
     allStudents?.filter((student) => !existingStudents?.includes(student._id)) || []
   //console.log('available stu', availableStudents)
+  const studentOptions = availableStudents.map((student) => ({
+    value: student._id,
+    label: student.name,
+  }))
 
   const formik = useFormik({
     initialValues: {
@@ -53,7 +55,7 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log('values', values)
+      //console.log('values', values)
       const payload = {
         studentId: values.student,
         currentSoftware: values.currentSoftware,
@@ -71,31 +73,75 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
         {
           onSuccess: () => {
             queryClient.invalidateQueries(['batches'])
-            queryClient.invalidateQueries(['batch',batch._id])
+            queryClient.invalidateQueries(['batch', batch._id])
             formik.resetForm()
             onSuccess?.()
           },
-          onError: (error)=>{
+          onError: (error) => {
             toast.error(error?.response?.data?.message)
-          }
+          },
         }
       )
     },
-  
   })
 
-//   console.log('student', formik.values.student)
-//   console.log(formik.values.student , courseCategoryId
-// )
-  //const {data : subjects = []} = ctx.useGetStudentSubjects(formik.values.student , batch.course )
-  const {data : subjects = []} = ctx.useGetStudentSubjectsBasedOnCategory(formik.values.student , courseCategoryId )
- //console.log('sub',subjects)
- //console.log('sub1',subjects)
-//console.log('availstu',availableStudents)
-  //console.log('subjects',ctx.getCourseSubjectLists?.data)
+const getAlreadyAssignedSubjects = (studentId, allBatches) => {
+  const assignedSubjectIds = new Set();
+
+  allBatches.forEach((batch) => {
+    batch.students?.forEach((s) => {
+      const sid = s.student?._id || s.student;
+      if (sid === studentId) {
+        s.subjects?.forEach((sub) => {
+          assignedSubjectIds.add(sub.subject?._id || sub.subject);
+        });
+      }
+    });
+  });
+
+  return [...assignedSubjectIds];
+};
+
+  const {data: subjects = []} = ctx.useGetStudentSubjectsBasedOnCategory(formik.values.student)
+
+
+const alreadyAssignedSubjectIds =
+  getAlreadyAssignedSubjects(formik.values.student, allBatches);
+
+const filteredSubjects =
+  subjects?.data?.map((group) => ({
+    ...group,
+    subjects: group.subjects.filter(
+      (item) =>
+        !alreadyAssignedSubjectIds.includes(item.subject._id)
+    ),
+  })) || [];
+  //console.log('sub',subjects)
+  //console.log('sub1',subjects)
+  //console.log('availstu',availableStudents)
+  //console.log('subjects',filteredSubjects)
   return (
     <form onSubmit={formik.handleSubmit}>
       <div className='row mb-6'>
+        <label className='col-12 col-form-label required fw-bold fs-6'>Select Student</label>
+
+        <div className='col-12 fv-row'>
+          <Select
+            options={studentOptions}
+            placeholder='Search & select student...'
+            isSearchable
+            value={studentOptions.find((opt) => opt.value === formik.values.student)}
+            onChange={(option) => formik.setFieldValue('student', option.value)}
+            onBlur={() => formik.setFieldTouched('student', true)}
+            classNamePrefix='react-select'
+          />
+
+          {formik.touched.student && formik.errors.student && (
+            <div className='text-danger mt-1'>{formik.errors.student}</div>
+          )}
+        </div>
+      </div>
+      {/* <div className='row mb-6'>
         <label className='col-12 col-form-label required fw-bold fs-6'>Select Student</label>
         <div className='col-12 fv-row'>
           <select
@@ -103,7 +149,7 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
               formik.touched.student && formik.errors.student ? 'is-invalid' : ''
             }`}
             {...formik.getFieldProps('student')}
-            // onChange={(e)=>setSelectedStudentId(e.target.value)}
+            
           >
             <option value='' hidden>Select Student</option>
             {availableStudents.map((student) => (
@@ -121,31 +167,33 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
             </small>
           )}
         </div>
-      </div>
+      </div> */}
       {/* select subject  */}
       <div className='row mb-6'>
         <label className='col-12 col-form-label required fw-bold fs-6'>Subjects</label>
 
         <div className='d-flex flex-column '>
-          {subjects?.data?.map((sub,i) => (
-            <div key={sub?.Subjects?._id+i} className=' d-flex flex-column align-items-start form-check mb-2'>
-              {
-                sub?.subjects?.map((item,i)=>(
+          {filteredSubjects.map((sub, i) => (
+            <div
+              key={sub?.Subjects?._id + i}
+              className=' d-flex flex-column align-items-start form-check mb-2'
+            >
+              {sub?.subjects?.map((item, i) => (
                 <div key={item.subject?._id}>
-                   <input
+                  <input
                     type='checkbox'
                     className='form-check-input'
                     id={item?.subject?._id}
                     checked={formik.values.subject.includes(item?.subject?._id)}
                     onChange={(e) => {
                       let updated = [...formik.values.subject]
-    
+
                       if (e.target.checked) {
                         updated.push(item?.subject?._id)
                       } else {
                         updated = updated.filter((id) => id !== item?.subject?._id)
                       }
-    
+
                       formik.setFieldValue('subject', updated)
                     }}
                   />
@@ -153,8 +201,7 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
                     {item?.subject?.subjectName}
                   </label>
                 </div>
-                 ))
-              }
+              ))}
             </div>
           ))}
 
@@ -165,9 +212,9 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
           <small className='text-muted d-block mt-2'>Select one or more subjects.</small>
         </div>
       </div>
-      
+
       {/* current software  */}
-      <div className='row mb-6'>
+      {/* <div className='row mb-6'>
         <label className='col-12 col-form-label required fw-bold fs-6'>Current Software</label>
         <div className='col-12 fv-row'>
           <input
@@ -185,7 +232,7 @@ const AddStudentToBatchForm = ({batch, onSuccess}) => {
             This is the software the student will be learning in this batch.
           </small>
         </div>
-      </div>
+      </div> */}
 
       <div className='row'>
         <div className='col-12'>

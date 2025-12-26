@@ -39,7 +39,7 @@ router
 
   router.post('/add',addCourseSubjectsToStudentController)
   router.get('/marks/:studentId/:courseId',getCourseSubjectBasedOnStudentController)
-  router.get('/based-on-category/:studentId/:courseCategoryId',getCourseSubjectBasedOnCourseCategoryStudentController)
+  router.get('/based-on-student/:studentId',getCourseSubjectBasedOnCourseCategoryStudentController)
   router.put('/marks',updateStudentSubjectMarksController)
   router.put('/marks/bulk',updateStudentMultipleSubjectMarksController)
   router.get('/marks',getAllCourseSubjectMarksController)
