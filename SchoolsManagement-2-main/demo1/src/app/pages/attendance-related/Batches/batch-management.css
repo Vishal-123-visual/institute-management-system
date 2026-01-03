@@ -313,3 +313,47 @@
   color: #2d3748;
   font-weight: 600;
 }
+
+
+.attendance-letter{
+  width: 20px;
+  height: 20px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 0%;
+  margin: 0%;
+}
+
+/* Sticky column base */
+.sticky-col {
+  position: sticky;
+  background: white;
+  z-index: 2;
+}
+
+/* First column */
+.sticky-col-1 {
+  left: 0;
+  min-width: 50px;
+  max-width: 50px;
+  background: white;
+}
+
+/* Second column */
+.sticky-col-2 {
+  left: 50px; /* must match col-1 width */
+  min-width: 120px;
+  max-width: 120px;
+  background: white;
+  z-index: 3; /* higher than col-1 */
+}
+
+/* Header sticky fix */
+.table thead th.sticky-col {
+  z-index: 4;
+  background: white;
+}
+

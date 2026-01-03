@@ -52,6 +52,7 @@ export const UserRoleAccessProvider = ({children}) => {
     queryFn: async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/user-role`, config)
+        //console.log('roledata',response.data)
         return response.data
       } catch (error) {
         throw new Error('Error fetching student data: ' + error.message)

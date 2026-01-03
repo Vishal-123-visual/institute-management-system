@@ -10,6 +10,7 @@ import './batch-management.css'
 import PopUpModal from '../../../modules/accounts/components/popUpModal/PopUpModal'
 import UpdateSubjectStatusForm from './UpdateSubjectStatusForm'
 import BatchReport from './BatchReport'
+import AttendanceRegister from './Attendence'
 
 const BatchManagement = () => {
   const { id: companyId } = useParams()
@@ -43,6 +44,10 @@ const BatchManagement = () => {
   const handleViewReport = (batch) => {
     // setSelectedBatch(batch)
     setActiveTab('report')
+  }
+  const handleAttendance = (batch) => {
+    // setSelectedBatch(batch)
+    setActiveTab('attendance')
   }
 
   const handleAddStudent = (batch) => {
@@ -108,6 +113,13 @@ const BatchManagement = () => {
               // disabled={!selectedBatch}
             >
               Batch Report
+            </button>
+            <button
+              className={`nav-link ${activeTab === 'attendance' ? 'active' : ''}`}
+              onClick={() => setActiveTab('attendance')}
+              // disabled={!selectedBatch}
+            >
+              Attendance
             </button>
           </div>
 
@@ -177,6 +189,15 @@ const BatchManagement = () => {
 
             {activeTab === 'report' &&  (
               <BatchReport
+                batches={batches}
+                onBack={() => {
+                  setActiveTab('list')
+                  setSelectedBatch(null)
+                }}
+              />
+            )}
+            {activeTab === 'attendance' &&  (
+              <AttendanceRegister
                 batches={batches}
                 onBack={() => {
                   setActiveTab('list')

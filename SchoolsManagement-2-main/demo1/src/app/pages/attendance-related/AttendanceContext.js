@@ -313,6 +313,57 @@ export const AttendanceContextProvider = ({children}) => {
     },
   })
 
+  /// attendence query statrt here 
+  
+  const saveAttendenceMutation = useMutation({
+    mutationFn:async(data)=>{
+      const res = await axios.post(`${BASE_URL}/api/attendence`,data,config)
+      return res.data
+    },
+    onSuccess: async(data)=>{
+       console.log(data)
+       toast.success(data?.message)
+    },
+    onSettled: async (_,error)=>{
+      if(error){
+        console.log(error)
+        toast.error(error.response?.data?.message || 'Error in saving attendence') 
+      }
+      else{
+        await queryClient.invalidateQueries({queryKey:['getAttendance']})
+      }
+    }
+  })
+
+  const useGateAttendenceByBatch = (batchId,month,year) =>{
+    return useQuery(
+      ['getAttendance',batchId,month,year],
+        async ()=>{
+        const res = await axios.get(`${BASE_URL}/api/attendence/${batchId}?month=${month}&year=${year}`,config)
+        return res.data
+      },
+      {
+        enabled : !!batchId ,
+        keepPreviousData : true,
+      }
+    )
+  }
+
+  const useGateAttendanceByStudentId = (studentId)=>{
+    return useQuery(
+      ['getAttendanceByStudnedId',studentId],
+      async ()=> {
+        const res =  await axios.get(`${BASE_URL}/api/attendence/student/${studentId}`,config)
+          return res.data
+      },
+      {
+        enabled : !!studentId,
+        keepPreviousData:true,
+      }
+
+    )
+  }
+
   return (
     <attendanceContext.Provider
       value={{
@@ -334,6 +385,11 @@ export const AttendanceContextProvider = ({children}) => {
         useGetSingleBatchTimeById,
         updateBatchTimeMutation,
         deleteBatchTimeMutation,
+
+        // attendence
+        saveAttendenceMutation,
+        useGateAttendenceByBatch,
+        useGateAttendanceByStudentId
       }}
     >
       {children}

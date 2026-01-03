@@ -185,7 +185,7 @@ export const getAllBatches = async (req, res) => {
       .populate({
         path: "students.student",
         model: "Students",
-        select: "name courseName",
+        select: "name courseName remainingCourseFees date_of_joining",
         populate: {
           path: "courseName",
           model: "Course",

@@ -128,6 +128,7 @@ const StudentCommission = () => {
       </datalist>
     )
   }
+  //console.log('filterstudent',params)
 
   return (
     <>
@@ -157,7 +158,7 @@ const StudentCommission = () => {
                       {...formik.getFieldProps('studentName')}
                       placeholder='Enter Student Name'
                     >
-                      <option value=''>--Select Student Name--</option>
+                      <option value='' hidden>--Select Student Name--</option>
                       {filteredStudents?.map((student) => (
                         <option key={student._id} value={`${student.name}-${student.rollNumber}`}>
                           {`${student.name}-${student.rollNumber}`}
@@ -184,7 +185,7 @@ const StudentCommission = () => {
                         handleCommissionPersonChange(e) // Update selected account ID state
                       }}
                     >
-                      <option value=''>--Select Commission Person--</option>
+                      <option value='' hidden>--Select Commission Person--</option>
                       {dayBookAccountCtx.getDayBookAccountsLists?.data
                         ?.filter(
                           (cp) =>

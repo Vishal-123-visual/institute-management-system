@@ -16,21 +16,19 @@ const validationSchema = Yup.object().shape({
 
 const AddStudentToBatchForm = ({batch, onSuccess}) => {
   const [existingStudents, setExistingStudents] = useState()
-  const {useAddStudentToBatch,useGetALLbatches} = useBatchContext()
+  const {useAddStudentToBatch, useGetALLbatches} = useBatchContext()
   const {studentsLists} = useAdmissionContext()
   const addStudentMutation = useAddStudentToBatch()
   const ctx = useCourseSubjectContext()
   const queryClient = useQueryClient()
-  const { data: allBatchesData } = useGetALLbatches({})
-const allBatches = allBatchesData?.data || []
-
+  const {data: allBatchesData} = useGetALLbatches({})
+  const allBatches = allBatchesData?.data || []
 
   //console.log('batch', allBatches)
   //console.log('id',selectedStudentId)
 
   // filter students by courseId
   const allStudents = studentsLists.data.users
-  
 
   // const allStudents = studentsLists.data.users?.filter((stu)=> stu.courseName.category ===courseCategoryId) || []
   // console.log('filter',allStudents)
@@ -85,37 +83,34 @@ const allBatches = allBatchesData?.data || []
     },
   })
 
-const getAlreadyAssignedSubjects = (studentId, allBatches) => {
-  const assignedSubjectIds = new Set();
+  const getAlreadyAssignedSubjects = (studentId, allBatches) => {
+    const assignedSubjectIds = new Set()
 
-  allBatches.forEach((batch) => {
-    batch.students?.forEach((s) => {
-      const sid = s.student?._id || s.student;
-      if (sid === studentId) {
-        s.subjects?.forEach((sub) => {
-          assignedSubjectIds.add(sub.subject?._id || sub.subject);
-        });
-      }
-    });
-  });
+    allBatches.forEach((batch) => {
+      batch.students?.forEach((s) => {
+        const sid = s.student?._id || s.student
+        if (sid === studentId) {
+          s.subjects?.forEach((sub) => {
+            assignedSubjectIds.add(sub.subject?._id || sub.subject)
+          })
+        }
+      })
+    })
 
-  return [...assignedSubjectIds];
-};
+    return [...assignedSubjectIds]
+  }
 
   const {data: subjects = []} = ctx.useGetStudentSubjectsBasedOnCategory(formik.values.student)
 
+  const alreadyAssignedSubjectIds = getAlreadyAssignedSubjects(formik.values.student, allBatches)
 
-const alreadyAssignedSubjectIds =
-  getAlreadyAssignedSubjects(formik.values.student, allBatches);
-
-const filteredSubjects =
-  subjects?.data?.map((group) => ({
-    ...group,
-    subjects: group.subjects.filter(
-      (item) =>
-        !alreadyAssignedSubjectIds.includes(item.subject._id)
-    ),
-  })) || [];
+  const filteredSubjects =
+    subjects?.data?.map((group) => ({
+      ...group,
+      subjects: group.subjects.filter(
+        (item) => !alreadyAssignedSubjectIds.includes(item.subject._id)
+      ),
+    })) || []
   //console.log('sub',subjects)
   //console.log('sub1',subjects)
   //console.log('availstu',availableStudents)
@@ -130,10 +125,19 @@ const filteredSubjects =
             options={studentOptions}
             placeholder='Search & select student...'
             isSearchable
+            openMenuOnFocus
+            openMenuOnClick
+            controlShouldRenderValue={false} // keeps search visible
             value={studentOptions.find((opt) => opt.value === formik.values.student)}
             onChange={(option) => formik.setFieldValue('student', option.value)}
             onBlur={() => formik.setFieldTouched('student', true)}
             classNamePrefix='react-select'
+            styles={{
+              menu: (base) => ({
+                ...base,
+                zIndex: 9999,
+              }),
+            }}
           />
 
           {formik.touched.student && formik.errors.student && (

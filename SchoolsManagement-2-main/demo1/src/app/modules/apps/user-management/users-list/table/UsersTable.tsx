@@ -24,7 +24,7 @@ const UsersTable = () => {
     data,
   })
 
-  // console.log('what in rows ', rows)
+   console.log('what in rows ', rows)
 
   return (
     <KTCardBody className='py-4'>

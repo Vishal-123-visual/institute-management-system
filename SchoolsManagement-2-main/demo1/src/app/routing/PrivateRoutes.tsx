@@ -76,6 +76,7 @@ import StudentCourseDataDownload from '../pages/monthly_Reports/StudentCourseDat
 import StudentProfileView from '../pages/student-profile/StudentProfileView'
 import ViewLinkAccount from '../pages/dayBook/ViewLinkAccount'
 import ShowSingleLinkAccountData from '../pages/dayBook/ShowSingleLinkAccountData'
+import AttendanceOfSingleStudent from '../pages/attendance-related/Batches/AttendanceOfSingleStudent'
 // import DynamicEnquiryForm from '../pages/enquiry-related/DynamicEnquiryForm'
 // import GeneralSettingForm from '../pages/general-setting-dynamic-form/GeneralSettingForm'
 // import TopBarFormSelector from '../pages/general-setting-dynamic-form/TopBarFormSelector'
@@ -341,6 +342,7 @@ const PrivateRoutes = () => {
             <Route path='/add-lab/:id' element={<LabsList />} />
             <Route path='/add-batch/:id' element={<BatchManagement />} />
             <Route path='/add-timing/:id' element={<TimingList />} />
+            <Route path='/attendance/student/:id' element={<AttendanceOfSingleStudent />} />
             {/* <------------------- Monthly Reports Routes Starts Here -------------------> */}  
             <Route
               path='/monthly-reports/:id'

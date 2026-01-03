@@ -31,7 +31,7 @@ const StudentProfileDetailsPage = () => {
     studentInfoData?.companyName
   )
 
-  // console.log(studentInfoData)
+   //console.log(studentInfoData)
   let cutWithGSTAmount =
     singleComapnyData?.isGstBased === 'Yes'
       ? (Number(studentInfoData?.totalPaid) /
@@ -44,6 +44,11 @@ const StudentProfileDetailsPage = () => {
     //console.log('data of subjects based on course', data)
     // console.log('navigating to the course subject page !!!', updateUserId)
     navigate('/course-subjects-addMarks', { state: studentInfoData })
+  }
+  const navigateAttendanceHandler = () => {
+    //console.log('data of subjects based on course', data)
+    // console.log('navigating to the course subject page !!!', updateUserId)
+    navigate(`/attendance/student/${studentInfoData?._id}`)
   }
 
   const installmentHandler = () => {
@@ -163,6 +168,15 @@ const StudentProfileDetailsPage = () => {
                           data-kt-menu-flip='top-end'
                         >
                           Course Subjects
+                        </button>
+                        <button
+                          onClick={navigateAttendanceHandler}
+                          className='btn  btn-bg-light btn-active-color-primary'
+                          data-kt-menu-trigger='click'
+                          data-kt-menu-placement='bottom-end'
+                          data-kt-menu-flip='top-end'
+                        >
+                          Attendance
                         </button>
                         {/* <Dropdown1 /> */}
                       </div>

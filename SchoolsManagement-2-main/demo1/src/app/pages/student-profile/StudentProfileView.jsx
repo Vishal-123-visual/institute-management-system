@@ -114,9 +114,9 @@ const StudentProfileView = () => {
                       </a>
                     </div>
                   </div>
-
+{/* 
                   <div className='d-flex my-4'>
-                    {/* <a href='#' className='btn btn-sm btn-light me-2' id='kt_user_follow_button'>
+                    <a href='#' className='btn btn-sm btn-light me-2' id='kt_user_follow_button'>
                       <KTIcon iconName='check' className='fs-3 d-none' />
 
                       <span className='indicator-label'>Follow</span>
@@ -132,8 +132,8 @@ const StudentProfileView = () => {
                       data-bs-target='#kt_modal_offer_a_deal'
                     >
                       Hire Me
-                    </a> */}
-                  </div>
+                    </a>
+                  </div> */}
                 </div>
 
                 <div className='d-flex flex-wrap flex-stack'>

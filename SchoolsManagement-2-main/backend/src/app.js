@@ -33,6 +33,7 @@ import allMails from "./routes/getAllEmailsData.routes.js";
 import emailTemplate from "./routes/emailTemplate.routes.js";
 import approvalRoutes from "./routes/approval.routes.js";
 import teacherRoutes from "./routes/teacher.routes.js";
+import attendenceRoute from './routes/attendence.routes.js'
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use("/api/add-lab", labRoutes);
 app.use("/api/email", emailTemplate);
 app.use("/api/add-timing", timingRoutes);
 app.use("/api/batches", batchRoutes);
+app.use("/api/attendence", attendenceRoute);
 app.use("/api/submit-form", submitForm);
 app.use("/api/user-role", userRoleAccessRoutes);
 app.use("/api/receipt-approval", approvalRoutes);
