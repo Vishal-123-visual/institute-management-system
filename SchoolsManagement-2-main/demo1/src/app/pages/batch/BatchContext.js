@@ -18,9 +18,18 @@ const createBatchApi = async (payload, config) => {
 }
 
 // GET ALL BATCH WITH FILTERS
-const fetchAllBathes = async (filters, config) => {
-  const query = new URLSearchParams(filters).toString()
-  const res = await axios.get(`${baseUrl}/api/batches?${query}`, config)
+const fetchAllBathes = async (filters,companyId, config) => {
+  console.log('compny',companyId)
+  // const query = new URLSearchParams(filters).toString()
+  const query = new URLSearchParams(
+  Object.entries(filters).reduce((acc, [key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      acc[key] = value
+    }
+    return acc
+  }, {})
+).toString()
+  const res = await axios.get(`${baseUrl}/api/batches/company/${companyId}?${query}`, config)
   return res.data
 }
 
@@ -84,6 +93,7 @@ const removeStudentFromBatchApi = async({batchId,studentId}, config)=>{
 export const BatchProvider = ({children}) => {
   const queryClient = useQueryClient()
   const {auth} = useAuth()
+  console.log('auth',auth)
   const config = {
     headers: { Authorization: `Bearer ${auth?.api_token}` },
   }
@@ -92,8 +102,12 @@ export const BatchProvider = ({children}) => {
   ============= */
 
   // all batches (filters)
-  const useGetALLbatches = (filters = {}) => {
-    return useQuery(['batches', JSON.stringify(filters)], () => fetchAllBathes(filters, config), {staleTime: 1000 * 60 * 2})
+  const useGetALLbatches = (filters = {},companyId) => {
+    return useQuery(['batches',companyId, filters ], () => fetchAllBathes(filters,companyId, config), 
+    {
+      enabled: !!companyId,
+      staleTime: 1000 * 60 * 2,
+    })
   }
 
   /// single batch or batch by id

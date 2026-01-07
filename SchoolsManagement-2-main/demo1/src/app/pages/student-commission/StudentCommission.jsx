@@ -37,7 +37,7 @@ const StudentCommission = () => {
   // console.log(selectedAccountId)
 
   const {data: studentCommission, isLoading} = studentCTX.useGetStudentCommissionDataQuery(
-    location?.state?.name
+    location?.state?.nameRoll
   )
 
   const dayBookDataId = dayBookAccountCtx.getDayBookAccountsLists?.data?.find(
@@ -115,6 +115,7 @@ const StudentCommission = () => {
 
   // Helper function to render datalist options based on filter
   const filteredStudents = data?.filter((student) => student.companyName === params.companyId)
+  const student = filteredStudents.filter((stu)=> stu.name === (location.state.name.split('-')[0].trim()))
   function renderAccountNameOptions() {
     if (!filteredStudents || filteredStudents.length === 0) {
       return null
@@ -128,7 +129,8 @@ const StudentCommission = () => {
       </datalist>
     )
   }
-  //console.log('filterstudent',params)
+  // console.log('filterstudent',filteredStudents)
+  // console.log('stu',student)
 
   return (
     <>
@@ -159,7 +161,7 @@ const StudentCommission = () => {
                       placeholder='Enter Student Name'
                     >
                       <option value='' hidden>--Select Student Name--</option>
-                      {filteredStudents?.map((student) => (
+                      {student?.map((student) => (
                         <option key={student._id} value={`${student.name}-${student.rollNumber}`}>
                           {`${student.name}-${student.rollNumber}`}
                         </option>

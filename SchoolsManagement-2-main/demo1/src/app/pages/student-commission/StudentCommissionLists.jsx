@@ -32,7 +32,8 @@ const StudentCommissionLists = ({studentInfoData}) => {
             onClick={() =>
               navigate(`/student/commission/${studentInfoData.companyName._id}`, {
                 state: {
-                  name: studentInfoData?.name + '-' + studentInfoData.rollNumber,
+                  nameRoll: studentInfoData?.name + '-' + studentInfoData.rollNumber,
+                  name: studentInfoData?.name
                 },
               })
             }

@@ -1,7 +1,6 @@
 import express from "express";
 import {
   createBatch,
-  getAllBatches,
   getBatchById,
   updateBatch,
   deleteBatch,
@@ -10,7 +9,8 @@ import {
   addStudentToBatch,
   removeStudentFromBatch,
   getStudentProgress,
-  updateStudentSubjectStatus
+  updateStudentSubjectStatus,
+  getAllBatchesByCompany
 } from "../controllers/batch.controllers.js";
 import { requireSignIn, isAdmin } from "../middlewares/auth.middleware.js";
 
@@ -23,7 +23,7 @@ router.use(requireSignIn);
 router.post("/", createBatch);
 
 // Get all batches with filters
-router.get("/", getAllBatches);
+router.get("/company/:companyId", getAllBatchesByCompany);
 
 // Get pending batches (Super Admin only)
 router.get("/pending/all", isAdmin, getPendingBatches);

@@ -8,6 +8,7 @@ import trainerFormModel from "../models/attendance/trainer.models.js";
 import SubjectModel from "../models/subject/subject.models.js";
 import CourseModel from "../models/course/courses.models.js";
 import categoryModel from "../models/course/category.model.js";
+import CompanyModels from "../models/company/company.models.js";
 
 // Register the AdmissionForm model
 const AdmissionForm = admissionFormModel;
@@ -17,6 +18,7 @@ export const createBatch = async (req, res) => {
   try {
     const {
       name,
+      companyId,
       courseCategory,
       course,
       trainer,
@@ -32,7 +34,7 @@ export const createBatch = async (req, res) => {
     // Validate required fields
     if (
       !name ||
-      // !courseCategory ||
+      !companyId ||
       // !course ||
       !trainer ||
       !startTime ||
@@ -54,16 +56,16 @@ export const createBatch = async (req, res) => {
       });
     }
 
-    // Validate category exists if provided
-    // if (category) {
-    //   const categoryExists = await BatchCategory.findById(category);
-    //   if (!categoryExists) {
-    //     return res.status(404).json({
-    //       success: false,
-    //       message: "Category not found"
-    //     });
-    //   }
-    // }
+    // Validate company exists if provided
+   
+      const companyExists = await CompanyModels.findById(companyId);
+      if (!companyExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Company not found"
+        });
+      }
+   
 
     // validate courseCategory exists 
     // const courseCategoryExists = await categoryModel.findById(courseCategory)
@@ -142,6 +144,7 @@ export const createBatch = async (req, res) => {
 
     const batch = new Batch({
       name,
+      companyId,
       courseCategory,
       course,
       trainer,
@@ -169,11 +172,12 @@ export const createBatch = async (req, res) => {
 };
 
 // Get all batches with filters
-export const getAllBatches = async (req, res) => {
+export const getAllBatchesByCompany = async (req, res) => {
   try {
     const { trainer, isActive, startDate, endDate } = req.query;
-
-    const query = {};
+    const {companyId} = req.params;
+    //console.log('companyId', companyId)
+    const query = {companyId};
 
     if (trainer) query.trainer = trainer;
     if (isActive !== undefined) query.isActive = isActive === "true";
@@ -196,6 +200,7 @@ export const getAllBatches = async (req, res) => {
         path: "students.subjects.subject",
         select: "subjectName",
       })
+      .populate('companyId', 'companyName')
       .lean()
       .sort({ startDate: -1 });
 
@@ -474,12 +479,13 @@ export const removeStudentFromBatch = async (req, res) => {
 export const updateBatch = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name,courseCategory, course, trainer, startTime, endTime, startDate, status, students } =
+    const { name,companyId,courseCategory, course, trainer, startTime, endTime, startDate, status, students } =
       req.body;
 
     // Validate required fields
     if (
       !name ||
+      !companyId ||
       !courseCategory ||
       !course ||
       !trainer ||
@@ -506,6 +512,14 @@ export const updateBatch = async (req, res) => {
     //   }
     // }
 
+       // validate courseCategory exists 
+    const companyExists = await CompanyModels.findById(companyId)
+    if(!companyExists){
+      return res.status(404).json({
+        success : false,
+        message : "Company not found"
+      })
+    }
        // validate courseCategory exists 
     const courseCategoryExists = await categoryModel.findById(courseCategory)
     if(!courseCategoryExists){
@@ -594,6 +608,7 @@ export const updateBatch = async (req, res) => {
       id,
       {
         name,
+        companyId,
         courseCategory,
         course,
         trainer,
@@ -606,7 +621,7 @@ export const updateBatch = async (req, res) => {
       { new: true }
     )
       .populate("trainer", "trainerName trainerEmail")
-      // .populate('category', 'categoryName')
+      .populate('companyId', 'companyName')
       .populate({
         path: "students.student",
         model: "Students",

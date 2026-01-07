@@ -38,7 +38,7 @@ const BatchList = ({
       { id: batch._id, status: newStatus }
     )
   }
-  //console.log('batch', batches)
+  console.log('batch', batches)
 
   return (
     <>

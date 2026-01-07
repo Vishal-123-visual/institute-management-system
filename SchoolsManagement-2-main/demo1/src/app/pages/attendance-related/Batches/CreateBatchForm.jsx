@@ -92,6 +92,7 @@ const CreateBatchForm = ({ batch, companyId, isEdit = false, onSuccess }) => {
         companyId
       }
 
+      console.log('payload',payload)
       // if (isEdit && batch) {
       //   updateMutation.mutate(
       //     { id: batch._id, payload },

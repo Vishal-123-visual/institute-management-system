@@ -53,11 +53,11 @@ const batchSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'BatchCategory',
-    //   required: false
-    // },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true
+    },
     courseCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",

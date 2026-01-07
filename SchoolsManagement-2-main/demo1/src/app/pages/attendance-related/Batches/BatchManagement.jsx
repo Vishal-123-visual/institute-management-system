@@ -14,6 +14,7 @@ import AttendanceRegister from './Attendence'
 
 const BatchManagement = () => {
   const { id: companyId } = useParams()
+  console.log('companyId',companyId)
   const [activeTab, setActiveTab] = useState('list') // list, create, details, addStudent, progress, report
   const [selectedBatch, setSelectedBatch] = useState(null)
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -22,7 +23,7 @@ const BatchManagement = () => {
   const [searchTerm, setSearchTerm] = useState('')
 
   const { useGetALLbatches } = useBatchContext()
-  const { data: batches, isLoading, error } = useGetALLbatches({ companyId })
+  const { data: batches, isLoading, error } = useGetALLbatches({},companyId)
 
   const handleCreateBatch = () => {
     setModalType('create')
