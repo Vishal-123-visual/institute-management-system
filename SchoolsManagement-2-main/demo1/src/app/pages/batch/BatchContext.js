@@ -93,7 +93,7 @@ const removeStudentFromBatchApi = async({batchId,studentId}, config)=>{
 export const BatchProvider = ({children}) => {
   const queryClient = useQueryClient()
   const {auth} = useAuth()
-  console.log('auth',auth)
+  //console.log('auth',auth)
   const config = {
     headers: { Authorization: `Bearer ${auth?.api_token}` },
   }
