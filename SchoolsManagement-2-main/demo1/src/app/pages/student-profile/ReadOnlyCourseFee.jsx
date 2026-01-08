@@ -20,7 +20,7 @@ const ReadOnlyCourseFee = ({
   setStudentCourseFeesEditId,
   delelteStudentCourseFeesHandler,
 }) => {
-  console.log(studentInfoData, 'studentInfoData')
+  //console.log(studentInfoData, 'studentInfoData')
   const params = useParams()
   // console.log(params.id)
   // console.log(StudentFee)

@@ -24,7 +24,7 @@ const StudentEmailsTable = ({ studentInfoData }) => {
   const studentPayFeeCtx = useStudentCourseFeesContext()
   const result = studentPayFeeCtx.useSingleStudentCourseFees(studentInfoData?._id)
   const { emailTemplate } = useCompanyContext()
-  console.log('getemailt', emailTemplate)
+  //console.log('getemailt', emailTemplate)
   const { data: singleCompanyData } = companyCTX?.useGetSingleCompanyData(
     studentInfoData?.companyName
   )

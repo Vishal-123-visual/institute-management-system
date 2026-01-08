@@ -12,7 +12,8 @@ const StudentCommissionLists = ({studentInfoData}) => {
   let studentName = studentInfoData?.name?.split(' ').join('_') + '-' + studentInfoData?.rollNumber
 
   const {data, isLoading} = studentCTX.useGetStudentCommissionDataQuery(studentName)
-  console.log('studentdata',studentInfoData)
+  //console.log('studentdata',studentInfoData)
+  //console.log('data',data)
   return (
     <div className={`card my-10`}>
       {/* begin::Header */}
@@ -32,8 +33,7 @@ const StudentCommissionLists = ({studentInfoData}) => {
             onClick={() =>
               navigate(`/student/commission/${studentInfoData.companyName._id}`, {
                 state: {
-                  nameRoll: studentInfoData?.name + '-' + studentInfoData.rollNumber,
-                  name: studentInfoData?.name
+                  name: studentName,
                 },
               })
             }

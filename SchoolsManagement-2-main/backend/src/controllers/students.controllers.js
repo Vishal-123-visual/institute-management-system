@@ -425,7 +425,7 @@ export const addStudentComissionController = asyncHandler(
       companyId,
     } = req.body;
 
-    console.log(req.body);
+    //console.log(req.body);
 
     try {
       switch (true) {
@@ -520,8 +520,9 @@ export const addStudentComissionController = asyncHandler(
 export const getStudentCommissionListsController = asyncHandler(
   async (req, res) => {
     try {
+            console.log('data',req.query)
       const studentCommissionLists = await StudentComissionModel.find({
-        studentName: req.params.data.split("_").join(" "),
+        studentName: req.query.studentName,
       });
       res.status(200).json(studentCommissionLists);
     } catch (error) {

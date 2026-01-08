@@ -455,11 +455,13 @@ export const CompanyContextProvider = ({children}) => {
   })
 
   const useGetStudentCommissionDataQuery = (data) => {
+    //console.log('props',data)
     return useQuery({
       queryKey: ['getStudentCommissionLists', data],
       queryFn: async () => {
         try {
-          const response = await axios.get(`${BASE_URL}/api/students/commission/${data}`, config)
+          const response = await axios.get(`${BASE_URL}/api/students/commissionList`,{ params: {studentName:data}, ...config})
+          //console.log('response',response.data)
           return response.data // Return the data fetched from the API
         } catch (error) {
           throw new Error('Error fetching student data: ' + error.message)
@@ -713,7 +715,7 @@ export const CompanyContextProvider = ({children}) => {
     queryFn: async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/email/allTemplates`, config) 
-        console.log('allT',response.data)
+        //console.log('allT',response.data)
         setEmailTemplate(response.data)
         return response.data
       } catch (error) {

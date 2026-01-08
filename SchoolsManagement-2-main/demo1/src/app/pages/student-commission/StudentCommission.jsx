@@ -24,7 +24,7 @@ const StudentCommission = () => {
   const params = useParams()
   const location = useLocation()
   const [selectedAccountId, setSelectedAccountId] = useState(null)
-  //console.log(location.state.name)
+  //console.log(location.state)
   //console.log(params)
   const studentCTX = useCompanyContext()
   const {data} = studentCTX.useGetStudentsAccordingToCompanyQuery(params.companyId)
@@ -37,7 +37,7 @@ const StudentCommission = () => {
   // console.log(selectedAccountId)
 
   const {data: studentCommission, isLoading} = studentCTX.useGetStudentCommissionDataQuery(
-    location?.state?.nameRoll
+    location?.state?.name
   )
 
   const dayBookDataId = dayBookAccountCtx.getDayBookAccountsLists?.data?.find(
@@ -114,23 +114,25 @@ const StudentCommission = () => {
   })
 
   // Helper function to render datalist options based on filter
-  const filteredStudents = data?.filter((student) => student.companyName === params.companyId)
-  const student = filteredStudents.filter((stu)=> stu.name === (location.state.name.split('-')[0].trim()))
-  function renderAccountNameOptions() {
-    if (!filteredStudents || filteredStudents.length === 0) {
-      return null
-    }
-
-    return (
-      <datalist id='accountNameOptions'>
-        {filteredStudents.map((student) => {
-          return <option key={student._id} value={`${student.name}-${student.rollNumber}`}></option>
-        })}
-      </datalist>
-    )
-  }
+  // console.log('data',studentCommission)
+  // console.log('id',params.companyId)
+  // const filteredStudents = studentCommission?.filter((student) => student.companyName === params.companyId)
   // console.log('filterstudent',filteredStudents)
-  // console.log('stu',student)
+  // const student = filteredStudents.filter((stu)=> stu.name === (location.state.name.split('-')[0].trim()))
+  // function renderAccountNameOptions() {
+  //   if (!filteredStudents || filteredStudents.length === 0) {
+  //     return null
+  //   }
+
+  //   return (
+  //     <datalist id='accountNameOptions'>
+  //       {filteredStudents.map((student) => {
+  //         return <option key={student._id} value={`${student.name}-${student.rollNumber}`}></option>
+  //       })}
+  //     </datalist>
+  //   )
+  // }
+  //  console.log('stu',student)
 
   return (
     <>
@@ -161,11 +163,13 @@ const StudentCommission = () => {
                       placeholder='Enter Student Name'
                     >
                       <option value='' hidden>--Select Student Name--</option>
-                      {student?.map((student) => (
-                        <option key={student._id} value={`${student.name}-${student.rollNumber}`}>
-                          {`${student.name}-${student.rollNumber}`}
-                        </option>
-                      ))}
+                      
+                       
+                           <option  value={`${location.state.name}`}>
+                              {`${location.state.name}`}
+                            </option>
+                       
+                   
                     </select>
                     {formik.touched.studentName && formik.errors.studentName && (
                       <div className='fv-plugins-message-container'>

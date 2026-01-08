@@ -17,7 +17,7 @@ import PayStudentFeeOnline from './PayStudentFeeOnline'
 const BASE_URL = process.env.REACT_APP_BASE_URL
 
 const StudentCourseFee = ({className, studentInfoData}) => {
-  console.log(studentInfoData, 'studentInfoData')
+  //console.log(studentInfoData, 'studentInfoData')
   const params = useParams()
   const navigate = useNavigate()
   const {currentUser} = useAuth()

@@ -912,7 +912,7 @@ router.put(
 
 // Student Commission Start here -------------------------------------
 router.post("/commission", requireSignIn, addStudentComissionController);
-router.get("/commission/:data", getStudentCommissionListsController);
+router.get("/commissionList", getStudentCommissionListsController);
 // Student Commission End here ---------------------------------------
 
 router.post(

@@ -25,7 +25,7 @@ export const CustomFormFieldDataContextProvider = ({children}) => {
   const [fieldValues, setFieldValues] = useState([])
 
   useEffect(() => {
-  console.log('CustomFormFieldDataQuery data:', getAllCustomFormFieldDataQuery?.data)
+  //console.log('CustomFormFieldDataQuery data:', getAllCustomFormFieldDataQuery?.data)
   if (Array.isArray(getAllCustomFormFieldDataQuery?.data)) {
     setFieldValues(getAllCustomFormFieldDataQuery.data.map((field) => field.value || []))
   } else if (Array.isArray(getAllCustomFormFieldDataQuery?.data?.data)) {
