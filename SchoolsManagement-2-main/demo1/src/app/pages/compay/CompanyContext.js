@@ -687,8 +687,10 @@ export const CompanyContextProvider = ({children}) => {
   const postEmailTemplate = useMutation({
     mutationFn: async (data) => {
       //console.log(data)
-      return axios.post(`${BASE_URL}/api/email/template`, data, config)
-    },
+      const res = axios.post(`${BASE_URL}/api/email/template`, data, config)
+      console.log('res',res?.data)
+      return res  
+     },
     onMutate: () => {
       //console.log('mutate')
     },

@@ -13,6 +13,7 @@ import StudentIssue from '../student-issues/StudentIssue'
 import RenewStudentCourseFees from '../renewStudent-courseFees/RenewStudentCourseFees'
 import {useEffect, useMemo} from 'react'
 import StudentEmailsTable from '../student-issues/StudentEmailsTable'
+import StudentChangesNarration from '../student-issues/StudentChangesNarration'
 
 const BASE_URL = process.env.REACT_APP_BASE_URL
 const BASE_URL_Image = `${BASE_URL}/api/images`
@@ -841,15 +842,7 @@ const StudentProfileDetailsPage = () => {
           <AlertPendingFeesNewStudents studentInfoData={studentInfoData} />
           <StudentCommissionLists studentInfoData={studentInfoData} />
           <StudentIssue studentInfoData={studentInfoData} />
-          <div className='d-flex flex-column justify-content-center align-items-start bg-white border py-4 px-5 rounded gap-4'>
-            <h2 className='w-100  border-bottom pb-2'>Students Changes Narration</h2>
-              
-                    {studentInfoData?.message && (
-                      <div>
-                        <p className='text-danger fs-8 fw-bold'>{studentInfoData?.message} </p>
-                      </div>
-                    )}
-                  </div>
+          <StudentChangesNarration studentInfoData={studentInfoData}/>
           <StudentEmailsTable studentInfoData={studentInfoData} />
         </div>
       )}

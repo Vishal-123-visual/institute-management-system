@@ -896,6 +896,107 @@ router.post("/sendMailToSelectedStudents",requireSignIn, async (req, res, next) 
   }
 );
 
+router.post("/sendCourseChangeEmail",requireSignIn, async (req, res) => {
+    try {
+      console.log(req.body)
+      const { userIds, company, newCourse } = req.body;
+        
+      if (!company || typeof company !== "object") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid company data",
+        });
+      }
+
+      // 1️⃣ Get students
+      const students = await admissionFormModel.find(
+        { _id: { $in: userIds } },
+        "name email father_name mobile_number rollNumber"
+      );
+
+      if (!students.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No students found",
+        });
+      }
+
+      // 2️⃣ Get template
+      const templates = await EmailTemplateModel.find({});
+      if (!templates.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No email templates found",
+        });
+      }
+
+      const emailTemplate = templates[0].courseChangeTemplate;
+      if (!emailTemplate) {
+        return res.status(404).json({
+          success: false,
+          message: "Course change email template not found",
+        });
+      }
+
+      // 3️⃣ Template renderer
+      const generateEmailFromTemplate = (template, data) => {
+        return template.replace(/\$\{(.*?)\}/g, (_, key) => {
+          return (
+            key
+              .split(".")
+              .reduce((obj, k) => (obj ? obj[k] : ""), data) || ""
+          );
+        });
+      };
+
+      // 4️⃣ Admin emails
+      const admins = await userModel.find({ role: "SuperAdmin" }, "email");
+      const adminEmails = admins.map((a) => a.email);
+
+      let sentBy = `${req.user.fName} ${req.user.lName}`;
+
+      // 5️⃣ Send mail to each student
+      for (const student of students) {
+        const finalContent = generateEmailFromTemplate(emailTemplate, {
+          name: student.name,
+          companyName: company.companyName,
+          courseName: newCourse,
+        });
+
+        const htmlContent = finalContent.replace(/\n/g, "<br>");
+
+        const recipients = [
+          student.email,
+          ...adminEmails,
+          company.email,
+        ]
+          .filter(Boolean)
+          .join(",");
+
+        await sendEmail(
+          recipients,
+          "Course Change Confirmation",
+          "Course Update",
+          htmlContent,
+          req,
+          sentBy
+        );
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Course change email sent successfully",
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send course change email",
+      });
+    }
+  }
+);
+
 router.put(
   "/renewStudentCourseFees/:id",
   requireSignIn,

@@ -202,14 +202,9 @@ const UpdateAddmission = () => {
         // formData.append('course name id ', updateUserId?.courseName._id)
         formData.append('courseName', selectedCourseId)
 
-        context.updateStudentMutation.mutate(formData)
+        const res = context.updateStudentMutation.mutate(formData)
+        //console.log('res',res)
         setLoading(true)
-        toast(`Student Updated Successfully`, {
-          type: 'success',
-          bodyStyle: {
-            fontSize: '18px',
-          },
-        })
       } else {
         formData.append('courseName', selectedCourseId)
         context.createStudentMutation.mutate(formData)

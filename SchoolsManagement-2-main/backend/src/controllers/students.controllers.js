@@ -163,7 +163,9 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
       message,
     } = req.body;
     //console.log("req body ", req.body);
-
+    let userFullName = req?.user
+      ? `${req?.user?.fName} ${req?.user?.lName}`
+      : "Admin";
     // Use || for conditional updates
     student.companyName = req.body.companyName || student.companyName;
     student.rollNumber = rollNumber || student.rollNumber;
@@ -208,6 +210,7 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
       no_of_installments || student.no_of_installments;
     student.courseduration = req.body.courseduration || student?.courseduration;
     student.message = message || student.message;
+    student.updatedBy = userFullName;
 
     if (file) {
       let imagePath = student.image;
@@ -230,92 +233,85 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
     
 
     
-    let userFullName = req?.user
-      ? `${req?.user?.fName} ${req?.user?.lName}`
-      : "Admin";
-    // send email
-    try {
-      const updatedCourse = updatedStudent.select_course;
+    
+    // // send email
+    // try {
+    //   const updatedCourse = updatedStudent.select_course;
 
-      // ✅ Only send email if course actually changed
-      if (previousCourse !== updatedCourse) {
-        const recipients = [];
+    //   // ✅ Only send email if course actually changed
+    //   if (previousCourse !== updatedCourse) {
+    //     const recipients = [];
 
-        // Student email
-        if (updatedStudent.email) {
-          recipients.push(updatedStudent.email);
-        }
+    //     // Student email
+    //     if (updatedStudent.email) {
+    //       recipients.push(updatedStudent.email);
+    //     }
 
-        // Company email (if exists)
-        if (updatedStudent?.companyName?.email) {
-          recipients.push(updatedStudent.companyName.email);
-        }
+    //     // Company email (if exists)
+    //     // if (updatedStudent?.companyName?.email) {
+    //     //   recipients.push(updatedStudent.companyName.email);
+    //     // }
 
-        // sender email if exists (admin/superadmin/counsellor)
-        if(req?.user?.email){
-          recipients.push(req.user.email);
-        }
+    //     if (recipients.length > 0) {
+    //       await sendEmail(
+    //         recipients,
+    //         "Student Course Change Notification",
+    //         updatedStudent.message, // plain text
+    //         `
+    //       <p>Hello,</p>
 
-        if (recipients.length > 0) {
-          await sendEmail(
-            recipients,
-            "Student Course Change Notification",
-            updatedStudent.message, // plain text
-            `
-          <p>Hello,</p>
+    //       <p>The course of the following student has been <b>changed</b>:</p>
 
-          <p>The course of the following student has been <b>changed</b>:</p>
+    //       <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
+    //         <tr>
+    //           <td><b>Student Name</b></td>
+    //           <td>${updatedStudent.name}</td>
+    //         </tr>
+    //         <tr>
+    //           <td><b>Roll Number</b></td>
+    //           <td>${updatedStudent.rollNumber}</td>
+    //         </tr>
+    //         <tr>
+    //           <td><b>Previous Course</b></td>
+    //           <td>${previousCourse}</td>
+    //         </tr>
+    //         <tr>
+    //           <td><b>Updated Course</b></td>
+    //           <td>${updatedCourse}</td>
+    //         </tr>
+    //         <tr>
+    //           <td><b>Net Fees</b></td>
+    //           <td>₹${updatedStudent.netCourseFees}</td>
+    //         </tr>
+    //         <tr>
+    //           <td><b>Remaining Fees</b></td>
+    //           <td>₹${updatedStudent.remainingCourseFees}</td>
+    //         </tr>
+    //       </table>
 
-          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
-            <tr>
-              <td><b>Student Name</b></td>
-              <td>${updatedStudent.name}</td>
-            </tr>
-            <tr>
-              <td><b>Roll Number</b></td>
-              <td>${updatedStudent.rollNumber}</td>
-            </tr>
-            <tr>
-              <td><b>Previous Course</b></td>
-              <td>${previousCourse}</td>
-            </tr>
-            <tr>
-              <td><b>Updated Course</b></td>
-              <td>${updatedCourse}</td>
-            </tr>
-            <tr>
-              <td><b>Net Fees</b></td>
-              <td>₹${updatedStudent.netCourseFees}</td>
-            </tr>
-            <tr>
-              <td><b>Remaining Fees</b></td>
-              <td>₹${updatedStudent.remainingCourseFees}</td>
-            </tr>
-          </table>
+    //       <br/>
+    //       <p><b>Message:</b></p>
+    //       <p>${updatedStudent.message}</p>
 
-          <br/>
-          <p><b>Message:</b></p>
-          <p>${updatedStudent.message}</p>
+    //       <br/>
+    //       <p>
+    //         Updated By: <b>${userFullName}</b><br/>
+    //         Updated At: ${new Date().toLocaleString()}
+    //       </p>
 
-          <br/>
-          <p>
-            Updated By: <b>${userFullName}</b><br/>
-            Updated At: ${new Date().toLocaleString()}
-          </p>
-
-          <p>
-            Regards,<br/>
-            ${updatedStudent.companyName?.companyName}
-          </p>
-        `,
-            req,
-            userFullName || "Admin"
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Course change email error:", error.message);
-    }
+    //       <p>
+    //         Regards,<br/>
+    //         ${updatedStudent.companyName?.companyName}
+    //       </p>
+    //     `,
+    //         req,
+    //         userFullName || "Admin"
+    //       );
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error("Course change email error:", error.message);
+    // }
 
     if (updatedStudent.no_of_installments_expireTimeandAmount) {
       const newPaymentInstallmentOfStudent =

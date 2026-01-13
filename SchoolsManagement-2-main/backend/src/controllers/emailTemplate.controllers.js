@@ -4,12 +4,13 @@ import EmailTemplateModel from "../models/email-remainder/emailTemplate.models.j
 export const addEmailTemplateController = asyncHandler(
   async (req, res, next) => {
     try {
-      // console.log(req.body)
+       //console.log(req.body)
       const {
         customTemplate,
         cancellationTemplate,
         dynamicTemplate,
         courseSubjectTemplate,
+        courseChangeTemplate
       } = req.body;
 
       if (!customTemplate) {
@@ -32,6 +33,11 @@ export const addEmailTemplateController = asyncHandler(
           error: "All fields are required",
         });
       }
+      if (!courseChangeTemplate) {
+        return res.status(400).json({
+          error: "All fields are required",
+        });
+      }
 
       const emailsTemplates = await EmailTemplateModel.find({});
       emailsTemplates.forEach(
@@ -42,7 +48,9 @@ export const addEmailTemplateController = asyncHandler(
         cancellationTemplate,
         dynamicTemplate,
         courseSubjectTemplate,
+        courseChangeTemplate,
       });
+      //console.log(emailTemplate)
       await emailTemplate.save();
       res.status(200).json({ message: "Email Template Added" });
     } catch (error) {

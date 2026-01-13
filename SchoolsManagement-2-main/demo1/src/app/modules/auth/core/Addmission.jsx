@@ -153,14 +153,44 @@ export const AdmissionContextProvider = ({ children }) => {
   // update Student
   const updateStudentMutation = useMutation({
     mutationFn: async (updateStudent) => {
-      console.log('updatedata',updateStudent)
+      //console.log('updatedata',updateStudent)
       let id = updateStudent.get('id')
       return axios
         .put(`${BASE_URL}/api/students/${id}`, updateStudent, config) // Corrected order of arguments
         .then((res) => {
-          console.log('response',res.data)
-          return res.data
+          //console.log('response',res)
+          if(res.status === 200){
+            toast.success(`Student Updated Successfully`)
+            return res.data
+          }
         })
+    },
+
+    onSuccess: async (res,variables) =>{
+            console.log('res', res)
+            const updatedStudent = res
+              // ✅ Detect course change
+    const courseChanged =
+      updatedStudent?.message?.toLowerCase().includes("course") ||
+      updatedStudent?.select_course;
+
+    if (courseChanged) {
+      await axios.post(
+        `${BASE_URL}/api/students/sendCourseChangeEmail`,
+        {
+          userIds: [updatedStudent._id],
+          newCourse: updatedStudent.select_course,
+          company: {
+            companyName: updatedStudent.companyName.companyName,
+            email: updatedStudent.companyName.email,
+          },
+        },
+        config
+      );
+    }
+
+
+    await queryClient.invalidateQueries({ queryKey: ["getStudents"] });
     },
     onSettled: async (_, error) => {
       if (error) {

@@ -13,6 +13,7 @@ const DynamicEmailTemplate = () => {
     cancellationTemplate: '',
     dynamicTemplate: '',
     courseSubjectTemplate: '',
+    courseChangeTemplate: '',
   })
 
   // Define default templates
@@ -21,6 +22,7 @@ const DynamicEmailTemplate = () => {
     cancellationTemplate: 'This is the default cancellation template.',
     dynamicTemplate: 'This is the default dynamic template.',
     courseSubjectTemplate: 'This is the default course subject template.',
+    courseChangeTemplate: 'This is the default course change template.',
   }
 
   // Update the email template when `emailTemplates` changes
@@ -31,6 +33,7 @@ const DynamicEmailTemplate = () => {
         cancellationTemplate: emailTemplates[0]?.cancellationTemplate || '',
         dynamicTemplate: emailTemplates[0]?.dynamicTemplate || '',
         courseSubjectTemplate: emailTemplates[0]?.courseSubjectTemplate || '',
+        courseChangeTemplate: emailTemplates[0]?.courseChangeTemplate || '',
       })
     }
   }, [emailTemplates])
@@ -50,14 +53,15 @@ const DynamicEmailTemplate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await companyCTX.postEmailTemplate.mutate(emailTemplate)
+      const res = await companyCTX.postEmailTemplate.mutate(emailTemplate)
+      console.log('res',res)
     } catch (error) {
       console.error('Failed to submit template:', error)
     } finally {
       setEmailTemplate({
         customTemplate: '',
         cancellationTemplate: '',
-        courseSubjectTemplate: '',
+        // courseChangeTemplate: '',
         dynamicTemplate: '',
       })
     }
@@ -154,6 +158,20 @@ const DynamicEmailTemplate = () => {
             type='text'
             className='form-control'
             name='courseSubjectTemplate'
+          />
+
+
+          <div className='d-flex justify-content-between py-2'>
+            <h3 htmlFor='courseChangeTemplate'>Course Change Email Template</h3>
+          </div>
+          <textarea
+            id='courseChangeTemplate'
+            rows={15}
+            value={emailTemplate.courseChangeTemplate}
+            onChange={onChangeHandler}
+            type='text'
+            className='form-control'
+            name='courseChangeTemplate'
           />
         </div>
         <div className='d-flex'>
