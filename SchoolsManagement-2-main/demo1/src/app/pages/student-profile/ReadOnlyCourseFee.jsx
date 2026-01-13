@@ -20,10 +20,10 @@ const ReadOnlyCourseFee = ({
   setStudentCourseFeesEditId,
   delelteStudentCourseFeesHandler,
 }) => {
-  //console.log(studentInfoData, 'studentInfoData')
+  //console.log( 'studentInfoData',studentInfoData )
   const params = useParams()
   // console.log(params.id)
-  // console.log(StudentFee)
+ // console.log(StudentFee)
   const {auth, currentUser} = useAuth()
   const {getAllUserAccessRoleData} = useUserRoleAccessContext()
   const userRoleAccess = getAllUserAccessRoleData?.data?.roleAccessData
@@ -86,14 +86,16 @@ ${studentInfoData?.companyName?.companyName}`
           <div className='form-check form-check-sm form-check-custom form-check-solid'></div>
         </td>
         <td>{index + 1}</td>
-        <td>{StudentFee?.netCourseFees}</td>
+        <td>{StudentFee?.displayNetCourseFees}</td>
+        {/* <td>{StudentFee?.netCourseFees}</td> */}
         <td>
           {StudentFee?.amountPaid} <br />
           <span className='text-muted fw-semibold text-muted d-block fs-7'>
             {StudentFee.narration}
           </span>
         </td>
-        <td>{StudentFee?.remainingFees}</td>
+        <td>{StudentFee?.displayRemainingFees}</td>
+        {/* <td>{StudentFee?.remainingFees}</td> */}
         <td>{moment(StudentFee?.amountDate).format('DD-MM-YYYY')}</td>
         <td>{StudentFee?.reciptNumber}</td>
 

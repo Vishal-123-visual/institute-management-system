@@ -61,7 +61,8 @@ const AddOnCourseTable = ({
         subjectData,
         studentData,
       })
-      // console.log(res)
+
+       console.log(res.data)
       if (res.data.success) {
         toast.success(res.data.message, {
           style: {

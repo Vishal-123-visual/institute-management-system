@@ -1747,6 +1747,7 @@ export const updateSingleStudentCourseFeesController = asyncHandler(
 			lateFees,
 			reciptNumber,
 		} = req.body;
+		//console.log(req.body)
 
 		try {
 			const alreadyReceiptExists = await CourseFeesModel.findOne({

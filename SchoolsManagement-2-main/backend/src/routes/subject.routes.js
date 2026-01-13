@@ -90,16 +90,16 @@ router.post("/subject-mail", requireSignIn, async (req, res, next) => {
     const courseId = studentInfo.courseName;
     const desiredSemYear = ["Year 1", "Year 2"];
     // Extract the array of subject entries
-    const subjectsArray = subjectData.subjectData;
+    const subjectsArray = subjectData?.subjectData?.data;
 
     const companyData = await CompanyModels.findById(
-      subjectData.studentData.companyName
+      subjectData.studentData.companyName._id
     );
 
     // Filter subjects for the current student, course, and desired semester year
     const studentSubjects = subjectsArray
       .filter((data) => {
-        console.log("Data", data);
+        //console.log("Data", data);
         return (
           data.studentInfo._id === studentId && data.course._id === courseId
         );
@@ -158,7 +158,7 @@ router.post("/subject-mail", requireSignIn, async (req, res, next) => {
     // Convert line breaks to <br> tags for HTML formatting
     const formattedEmailContent = finalEmailContent.replace(/\n/g, "<br>");
 
-    console.log(subjectsString);
+    //console.log(subjectsString);
 
     // Extract the current student's email
     const studentEmail = studentInfo.email;

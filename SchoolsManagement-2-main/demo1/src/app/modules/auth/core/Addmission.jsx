@@ -153,10 +153,14 @@ export const AdmissionContextProvider = ({ children }) => {
   // update Student
   const updateStudentMutation = useMutation({
     mutationFn: async (updateStudent) => {
+      console.log('updatedata',updateStudent)
       let id = updateStudent.get('id')
       return axios
         .put(`${BASE_URL}/api/students/${id}`, updateStudent, config) // Corrected order of arguments
-        .then((res) => res.data)
+        .then((res) => {
+          console.log('response',res.data)
+          return res.data
+        })
     },
     onSettled: async (_, error) => {
       if (error) {

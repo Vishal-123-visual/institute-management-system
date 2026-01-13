@@ -165,8 +165,8 @@ const StudentCommission = () => {
                       <option value='' hidden>--Select Student Name--</option>
                       
                        
-                           <option  value={`${location.state.name}`}>
-                              {`${location.state.name}`}
+                           <option  value={`${location?.state?.name}`}>
+                              {`${location?.state?.name}`}
                             </option>
                        
                    

@@ -61,6 +61,31 @@ const StudentCourseFee = ({className, studentInfoData}) => {
   const studentPayFeeCtx = useStudentCourseFeesContext()
 
   const result = studentPayFeeCtx.useSingleStudentCourseFees(studentInfoData?._id)
+  //console.log('result',result)
+
+  // 1️⃣ Sort payments by date (oldest first)
+  const sortedFees = Array.isArray(result?.data)
+    ? [...result.data].sort((a, b) => new Date(a.amountDate) - new Date(b.amountDate))
+    : []
+
+  // 2️⃣ Calculate running balance
+  let runningNetFees = Number(studentInfoData?.netCourseFees || 0)
+
+  const calculatedFees = sortedFees.map((fee) => {
+    const amountPaid = Number(fee.amountPaid || 0)
+    const remaining = runningNetFees - amountPaid
+
+    const calculatedRow = {
+      ...fee,
+      displayNetCourseFees: runningNetFees,
+      displayRemainingFees: remaining,
+    }
+
+    runningNetFees = remaining
+    return calculatedRow
+  })
+  
+  //console.log('totalpaid',totalPaid)
   const newRecipt = result?.data?.length ? result?.data[result?.data.length - 1] : null
   // console.log(newRecipt)
   //console.log(studentPayFeeCtx.createStudentCourseFeesMutation.data)
@@ -414,7 +439,33 @@ const StudentCourseFee = ({className, studentInfoData}) => {
                     setAddOnlineStudentFeeFormToggle={setAddOnlineStudentFeeFormToggle}
                   />
                 )}
-                {result.data?.length > 0 ? (
+                {calculatedFees.length > 0 &&
+                  calculatedFees.map((StudentFee, index) => {
+                    const status = getReceiptStatus(StudentFee?._id)
+
+                    return (
+                      <React.Fragment key={StudentFee._id}>
+                        {StudentFee._id === studentCourseFeeEditId ? (
+                          <EditOnlyCourseFee
+                            StudentFee={StudentFee}
+                            setEditStudentCourseFees={setEditStudentCourseFees}
+                            setStudentCourseFeesEditId={setStudentCourseFeesEditId}
+                            editStudentCourseFees={editStudentCourseFees}
+                          />
+                        ) : (
+                          <ReadOnlyCourseFee
+                            studentInfoData={studentInfoData}
+                            StudentFee={StudentFee}
+                            index={index}
+                            status={status}
+                            delelteStudentCourseFeesHandler={delelteStudentCourseFeesHandler}
+                            setStudentCourseFeesEditId={setStudentCourseFeesEditId}
+                          />
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
+                {/* {result.data?.length > 0 ? (
                   result.data?.map((StudentFee, index) => {
                     const status = getReceiptStatus(StudentFee?._id)
                     // id = StudentFee?._id
@@ -442,7 +493,7 @@ const StudentCourseFee = ({className, studentInfoData}) => {
                   })
                 ) : (
                   <></>
-                )}
+                )} */}
               </tbody>
               {/* end::Table body */}
             </table>

@@ -32,11 +32,13 @@ export const CompanyContextProvider = ({children}) => {
     },
   })
   const useGetSingleCompanyData = (companyId) => {
+    //console.log('companyid',companyId)
     return useQuery({
       queryKey: ['getCompanyLists', companyId],
       queryFn: async () => {
         try {
           const response = await axios.get(`${BASE_URL}/api/company/${companyId}`, config)
+          //console.log('data',response.data)
           return response.data
         } catch (error) {
           throw new Error('Error fetching student data: ' + error.message)

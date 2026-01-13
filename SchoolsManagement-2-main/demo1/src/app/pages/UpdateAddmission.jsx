@@ -49,6 +49,7 @@ const addmissionFormSchema = Yup.object().shape({
   installment_duration: Yup.string().required('Installment Duration is required!'),
   no_of_installments: Yup.string(),
   no_of_installments_amount: Yup.string(),
+  message: Yup.string().required('Please write message why you are changing!'),
 })
 
 const UpdateAddmission = () => {
@@ -142,7 +143,10 @@ const UpdateAddmission = () => {
 
   // let updateStudentId = updateUserId?._id
 
-  let initialValues = updateUserId
+  let initialValues = {
+    message: '',
+    ...updateUserId,
+  }
 
   //console.log(updateStudentInitialValues)
   useEffect(() => {
@@ -826,7 +830,40 @@ const UpdateAddmission = () => {
 
               {/* ---------------------------FOR OFFICE USE ONLY END HERE ----------------------- */}
             </div>
+            {/* ===================== MESSAGE FIELD START HERE ===================== */}
+            <div className='row mt-5 px-5 py-2'>
+              <div
+                className='card-header border-1 cursor-pointer'
+                role='button'
+                aria-expanded='true'
+              >
+                <div className='card-title m-0'>
+                  <h3 className='fw-bolder m-0'>Reason for Update</h3>
+                </div>
+              </div>
 
+              <div className='col-12 mt-5'>
+                <div className='row px-4'>
+                  <label className='col-lg-3 col-form-label required fw-bold fs-6'>Message</label>
+
+                  <div className='col-lg-12 fv-row'>
+                    <textarea
+                      rows={4}
+                      className='form-control form-control-lg form-control-solid'
+                      placeholder='Please write message why you are changing!'
+                      {...formik.getFieldProps('message')}
+                    ></textarea>
+
+                    {formik.touched.message && formik.errors.message && (
+                      <div className='fv-plugins-message-container'>
+                        <div className='fv-help-block'>{formik.errors.message}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+ {/* ===================== MESSAGE FIELD END HERE ===================== */}
             <div className='card-footer d-flex justify-content-end py-6 px-9'>
               <button type='submit' className='btn btn-primary' disabled={loading}>
                 {!context.createStudentMutation.isLoading &&

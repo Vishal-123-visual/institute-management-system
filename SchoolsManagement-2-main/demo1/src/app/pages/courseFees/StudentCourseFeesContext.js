@@ -25,7 +25,7 @@ export const StudentCourseFeesContextProvider = ({children}) => {
             `${BASE_URL}/api/courseFees/studentFees/${studentId}`,
             config
           )
-          // console.log(response.data)
+          //console.log('singlestudentfee', response.data)
           return response.data
         } catch (error) {
           throw new Error('Error fetching student data: ' + error.message)

@@ -35,15 +35,17 @@ export const updateStudentAsDropOutController = asyncHandler(
       // now add the drop student expire installment time also
       //console.log(dropOutStudent.no_of_installments);
       const studentMonthlyCollectionExpireData =
-        await PaymentInstallmentTimeExpireModel.updateMany({
-          studentInfo: req.params.id,
-          installment_number: dropOutStudent.no_of_installments,
-        },
-        {
-          $set: {
-            dropOutStudent: req.body.isDropOutStudent,
+        await PaymentInstallmentTimeExpireModel.updateMany(
+          {
+            studentInfo: req.params.id,
+            installment_number: dropOutStudent.no_of_installments,
           },
-        });
+          {
+            $set: {
+              dropOutStudent: req.body.isDropOutStudent,
+            },
+          }
+        );
 
       res
         .status(200)
@@ -110,6 +112,9 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
     }
 
     //console.log(student);
+    // ✅ Store previous data
+    const previousCourse = student.select_course;
+    const previousCourseName = student.courseName;
 
     // delete all installments of the payment expiration
     // await PaymentInstallmentTimeExpireModel.deleteMany({
@@ -155,8 +160,9 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
       down_payment,
       date_of_joining,
       no_of_installments,
+      message,
     } = req.body;
-    // console.log("req body ", req.body);
+    //console.log("req body ", req.body);
 
     // Use || for conditional updates
     student.companyName = req.body.companyName || student.companyName;
@@ -189,16 +195,19 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
     //   commision_voucher_number || student.commision_voucher_number;
     student.course_fees = course_fees || student.course_fees;
     student.discount = discount || student.discount;
-    if (req.body.remainingCourseFees === undefined) {
-      student.netCourseFees = netCourseFees || student.netCourseFees;
-    }
-    student.remainingCourseFees =
-      remainingCourseFees || student.remainingCourseFees;
+    // if (req.body.remainingCourseFees === undefined) {
+    //   student.netCourseFees = netCourseFees || student.netCourseFees;
+    // }
+    student.netCourseFees = netCourseFees || student.netCourseFees;
+    student.remainingCourseFees = student.netCourseFees - student.totalPaid;
+    // student.remainingCourseFees =
+    //   remainingCourseFees || student.remainingCourseFees;
     student.down_payment = down_payment || student.down_payment;
     student.date_of_joining = date_of_joining || student.date_of_joining;
     student.no_of_installments =
       no_of_installments || student.no_of_installments;
     student.courseduration = req.body.courseduration || student?.courseduration;
+    student.message = message || student.message;
 
     if (file) {
       let imagePath = student.image;
@@ -216,6 +225,97 @@ export const updateStudentController = asyncHandler(async (req, res, next) => {
     }
 
     let updatedStudent = await student.save();
+    await updatedStudent.populate('companyName')
+  
+    
+
+    
+    let userFullName = req?.user
+      ? `${req?.user?.fName} ${req?.user?.lName}`
+      : "Admin";
+    // send email
+    try {
+      const updatedCourse = updatedStudent.select_course;
+
+      // ✅ Only send email if course actually changed
+      if (previousCourse !== updatedCourse) {
+        const recipients = [];
+
+        // Student email
+        if (updatedStudent.email) {
+          recipients.push(updatedStudent.email);
+        }
+
+        // Company email (if exists)
+        if (updatedStudent?.companyName?.email) {
+          recipients.push(updatedStudent.companyName.email);
+        }
+
+        // sender email if exists (admin/superadmin/counsellor)
+        if(req?.user?.email){
+          recipients.push(req.user.email);
+        }
+
+        if (recipients.length > 0) {
+          await sendEmail(
+            recipients,
+            "Student Course Change Notification",
+            updatedStudent.message, // plain text
+            `
+          <p>Hello,</p>
+
+          <p>The course of the following student has been <b>changed</b>:</p>
+
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+              <td><b>Student Name</b></td>
+              <td>${updatedStudent.name}</td>
+            </tr>
+            <tr>
+              <td><b>Roll Number</b></td>
+              <td>${updatedStudent.rollNumber}</td>
+            </tr>
+            <tr>
+              <td><b>Previous Course</b></td>
+              <td>${previousCourse}</td>
+            </tr>
+            <tr>
+              <td><b>Updated Course</b></td>
+              <td>${updatedCourse}</td>
+            </tr>
+            <tr>
+              <td><b>Net Fees</b></td>
+              <td>₹${updatedStudent.netCourseFees}</td>
+            </tr>
+            <tr>
+              <td><b>Remaining Fees</b></td>
+              <td>₹${updatedStudent.remainingCourseFees}</td>
+            </tr>
+          </table>
+
+          <br/>
+          <p><b>Message:</b></p>
+          <p>${updatedStudent.message}</p>
+
+          <br/>
+          <p>
+            Updated By: <b>${userFullName}</b><br/>
+            Updated At: ${new Date().toLocaleString()}
+          </p>
+
+          <p>
+            Regards,<br/>
+            ${updatedStudent.companyName?.companyName}
+          </p>
+        `,
+            req,
+            userFullName || "Admin"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Course change email error:", error.message);
+    }
 
     if (updatedStudent.no_of_installments_expireTimeandAmount) {
       const newPaymentInstallmentOfStudent =
@@ -331,34 +431,38 @@ export const deleteStudentController = asyncHandler(async (req, res, next) => {
 export const getSingleStudentDetailsController = asyncHandler(
   async (req, res, next) => {
     try {
-      console.log(req.params.id)
+      //console.log(req.params.id)
       // Check if the parameter is a valid ObjectId
       const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
-      
+
       let student;
       if (isObjectId) {
         // If it's a valid ObjectId, search by _id
-        student = await admissionFormModel.findById(req.params.id).populate("courseName");
+        student = await admissionFormModel
+          .findById(req.params.id)
+          .populate("courseName");
       } else {
         // If it's not a valid ObjectId, search by email
-        student = await admissionFormModel.findOne({ email: req.params.id }).populate("courseName");
+        student = await admissionFormModel
+          .findOne({ email: req.params.id })
+          .populate("courseName");
       }
 
       if (!student) {
         return res.status(404).json({
           success: false,
-          message: "Student not found"
+          message: "Student not found",
         });
       }
 
       res.status(200).json({
         success: true,
-        data: student
+        data: student,
       });
     } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: error.message 
+      res.status(500).json({
+        success: false,
+        message: error.message,
       });
     }
   }
@@ -390,25 +494,30 @@ export const getStudentsAccordingToCompanyController = asyncHandler(
   }
 );
 
-export const getStudentsAccordingToCourseController = asyncHandler(async(req,res)=>{
-  const {companyId,courseId} = req.params
+export const getStudentsAccordingToCourseController = asyncHandler(
+  async (req, res) => {
+    const { companyId, courseId } = req.params;
 
-  if(!companyId || !courseId){
-    return res.status(400).json({
-      success : false,
-      message :"companyId and courseId are required"
-    })
+    if (!companyId || !courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "companyId and courseId are required",
+      });
+    }
+    const students = await admissionFormModel
+      .find({
+        companyName: companyId,
+        courseName: courseId,
+      })
+      .populate("courseName")
+      .sort({ name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      data: students,
+    });
   }
-  const students = await admissionFormModel.find({
-    companyName : companyId,
-    courseName: courseId
-  }).populate("courseName").sort({name: 1});
-
-  return res.status(200).json({
-    success : true,
-    data : students
-  })
-})
+);
 
 export const addStudentComissionController = asyncHandler(
   async (req, res, next) => {
@@ -520,7 +629,7 @@ export const addStudentComissionController = asyncHandler(
 export const getStudentCommissionListsController = asyncHandler(
   async (req, res) => {
     try {
-            console.log('data',req.query)
+      console.log("data", req.query);
       const studentCommissionLists = await StudentComissionModel.find({
         studentName: req.query.studentName,
       });

@@ -14,15 +14,16 @@ const MonthlyCollectionFee = () => {
   const [toDate, setToDate] = useState(new Date())
   const [searchValue, setSearchValue] = useState('')
   const paramsData = useParams()
-  console.log("paramsData", paramsData)
+  //console.log("paramsData", paramsData)
   const ctx = useStudentCourseFeesContext()
   const {useGetNotPaidStudents} = ctx
   const notPaidStudentsQuery = useGetNotPaidStudents(toDate, fromDate, paramsData?.id)
-  console.log(notPaidStudentsQuery)
+  //console.log(notPaidStudentsQuery)
   const studentCourseCTX = useCourseContext()
   const {data, isLoading} = ctx.useGetStudentMonthlyCourseFeesCollection(paramsData?.id)
   const studentPayFeeCtx = useStudentCourseFeesContext()
   const {data: result} = studentPayFeeCtx.getAllStudentsCourseFees
+  //console.log('first',result)
 
   
   // Fetch all courses data
