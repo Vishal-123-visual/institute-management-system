@@ -898,7 +898,7 @@ router.post("/sendMailToSelectedStudents",requireSignIn, async (req, res, next) 
 
 router.post("/sendCourseChangeEmail",requireSignIn, async (req, res) => {
     try {
-      console.log(req.body)
+      //console.log(req.body)
       const { userIds, company, newCourse } = req.body;
         
       if (!company || typeof company !== "object") {
