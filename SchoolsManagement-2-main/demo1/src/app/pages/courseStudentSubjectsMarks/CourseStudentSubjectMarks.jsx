@@ -1,7 +1,6 @@
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom'
 import {useCourseSubjectContext} from '../course/course_subject/CourseSubjectContext'
 import {useState, useEffect} from 'react'
-import {useAuth} from '../../modules/auth'
 import {toast} from 'react-toastify'
 import PopUpModal from '../../modules/accounts/components/popUpModal/PopUpModal'
 import AddSubjects from './AddSubjects'
@@ -12,7 +11,6 @@ const CourseStudentSubjectMarks = () => {
   /* =======================
      HOOKS (ALWAYS ON TOP)
   ======================= */
-  const {auth} = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const courseSubjectsCtx = useCourseSubjectContext()
@@ -22,7 +20,6 @@ const CourseStudentSubjectMarks = () => {
   const [selectedCourses, setSelectedCourses] = useState({})
   const [openModal, setOpenModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [allsubstu,setAllsubstu] = useState([])
    const courseCtx = useCourseContext()
 
   /* =======================
@@ -43,7 +40,7 @@ const CourseStudentSubjectMarks = () => {
      DATA
   ======================= */
   const studentId = hasState ? location.state._id : null
-  const courseId = hasState ? location?.state?.courseName?._id ?? location?.state?.courseName : null
+  const courseId = hasState ? location?.state?.courseName : null
    const selectedCourse = courseCtx?.getCourseLists?.data?.find((course)=> course?._id === courseId)
    //console.log('selecorse', selectedCourse)
    const selectedCourseCategory = selectedCourse?.category?._id

@@ -412,7 +412,7 @@ localStorage.setItem(
                     onClick={() => sendSubjectsEmail(studentSubjectMarksData, studentData)}
                     disabled={isSendingEmail === true}
                   >
-                    {isSendingEmail ? 'Sending...' : 'Send Email'}
+                    {isSendingEmail ? 'Sending...' : 'Subject Email'}
                   </button>
                   <button className='btn btn-info text-uppercase' onClick={handleClick}>
                     Add Subject

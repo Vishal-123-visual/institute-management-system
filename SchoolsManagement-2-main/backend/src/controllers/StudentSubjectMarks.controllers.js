@@ -217,11 +217,11 @@ export const updateStudentMultipleSubjectMarksController = asyncHandler(
 // GET STUDENT SUBJECTS WITH MARKS (Student-wise)
 export const getCourseSubjectBasedOnStudentController = asyncHandler(
   async (req, res) => {
-    const { studentId, courseId,courseCategoryId } = req.params;
+    const { studentId, courseId } = req.params;
     //console.log('sub', studentId,courseId)
 
     const data = await studentSubjectMarksModel
-      .find({ studentInfo: studentId, course: courseId, courseCategory: courseCategoryId, })
+      .find({ studentInfo: studentId, course: courseId })
       .populate("studentInfo", "name rollNumber")
       .populate("course", "courseName")
       .populate("subjects.subject", "_id subjectName subjectCode fullMarks passMarks");

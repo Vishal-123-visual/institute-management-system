@@ -63,7 +63,7 @@ if (container) {
                                   <CompanyContextProvider>
                                     <TeacherProvider>
                                       <BatchProvider>
-                                      <AppRoutes />
+                                        <AppRoutes />
                                       </BatchProvider>
                                     </TeacherProvider>
                                   </CompanyContextProvider>
