@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import clsx from 'clsx'
 import {Link} from 'react-router-dom'
 import {useFormik} from 'formik'
-import {getUserByToken, login} from '../core/_requests'
+import {getUserByToken, login, verifyOTP, resendOTP} from '../core/_requests'
 import {toAbsoluteUrl} from '../../../../_metronic/helpers'
 import {useAuth} from '../core/Auth'
 
@@ -20,9 +20,19 @@ const loginSchema = Yup.object().shape({
     .required('Password is required'),
 })
 
+const otpSchema = Yup.object().shape({
+  otp: Yup.string()
+    .length(6, 'OTP must be 6 digits')
+    .required('OTP is required'),
+})
+
 const initialValues = {
   email: 'rahul@gmail.com',
   password: '233124312423',
+}
+
+const otpInitialValues = {
+  otp: '',
 }
 
 /*
@@ -33,31 +43,203 @@ const initialValues = {
 
 export function Login() {
   const [loading, setLoading] = useState(false)
+  const [showOTPForm, setShowOTPForm] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [otpError, setOtpError] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState('')
   const {saveAuth, setCurrentUser} = useAuth()
 
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, {setStatus, setSubmitting}) => {
-      // console.log(values);
       setLoading(true)
+      setOtpError('')
       try {
-        const {data: auth} = await login(values.email, values.password)
-        // console.log(auth);
-
-        saveAuth(auth)
-        const {data: user} = await getUserByToken(auth.api_token)
-        setCurrentUser(user)
-      } catch (error) {
+        const {data} = await login(values.email, values.password)
+        
+        if (data.requiresOTP) {
+          // OTP required, show OTP form
+          setUserEmail(values.email)
+          setShowOTPForm(true)
+          setStatus('OTP sent to your email')
+          setSubmitting(false)
+        } else {
+          // No OTP needed, login directly
+          saveAuth(data)
+          if (data.api_token) {
+            const {data: user} = await getUserByToken(data.api_token!)
+            setCurrentUser(user)
+          }
+        }
+      } catch (error: any) {
         console.error(error)
         saveAuth(undefined)
-        setStatus('The login details are incorrect')
+        const errorMessage = error.response?.data?.message || 'The login details are incorrect'
+        setStatus(errorMessage)
         setSubmitting(false)
+      } finally {
         setLoading(false)
       }
     },
   })
 
+  const otpFormik = useFormik({
+    initialValues: otpInitialValues,
+    validationSchema: otpSchema,
+    onSubmit: async (values, {setSubmitting}) => {
+      setOtpError('')
+      setLoading(true)
+      try {
+        const {data: auth} = await verifyOTP(userEmail, values.otp)
+        
+        // OTP verified, save auth and get user
+        saveAuth(auth)
+        if (auth.api_token) {
+          const {data: user} = await getUserByToken(auth.api_token!)
+          setCurrentUser(user)
+        }
+        
+        // Reset forms
+        formik.resetForm()
+        otpFormik.resetForm()
+        setShowOTPForm(false)
+      } catch (error: any) {
+        console.error(error)
+        const errorMessage = error.response?.data?.message || 'Invalid OTP'
+        setOtpError(errorMessage)
+        setSubmitting(false)
+      } finally {
+        setLoading(false)
+      }
+    },
+  })
+
+  const handleResendOTP = async () => {
+    setResendLoading(true)
+    setResendSuccess('')
+    try {
+      await resendOTP(userEmail)
+      setResendSuccess('OTP resent successfully!')
+      setTimeout(() => setResendSuccess(''), 3000)
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to resend OTP'
+      setOtpError(errorMessage)
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
+  // Show OTP form if required
+  if (showOTPForm) {
+    return (
+      <form
+        className='form w-100'
+        onSubmit={otpFormik.handleSubmit}
+        noValidate
+        id='kt_otp_form'
+      >
+        {/* begin::Heading */}
+        <div className='text-center mb-11'>
+          <h1 className='text-dark fw-bolder mb-3'>Verify OTP</h1>
+          <div className='text-gray-500 fw-semibold fs-6'>
+            Enter the OTP sent to {userEmail}
+          </div>
+        </div>
+        {/* end::Heading */}
+
+        {otpError && (
+          <div className='mb-lg-15 alert alert-danger'>
+            <div className='alert-text font-weight-bold'>{otpError}</div>
+          </div>
+        )}
+
+        {resendSuccess && (
+          <div className='mb-lg-15 alert alert-success'>
+            <div className='alert-text font-weight-bold'>{resendSuccess}</div>
+          </div>
+        )}
+
+        {/* begin::Form group */}
+        <div className='fv-row mb-8'>
+          <label className='form-label fs-6 fw-bolder text-dark'>Enter OTP</label>
+          <input
+            placeholder='6-digit OTP'
+            {...otpFormik.getFieldProps('otp')}
+            className={clsx(
+              'form-control bg-transparent',
+              {'is-invalid': otpFormik.touched.otp && otpFormik.errors.otp},
+              {
+                'is-valid': otpFormik.touched.otp && !otpFormik.errors.otp,
+              }
+            )}
+            type='text'
+            name='otp'
+            autoComplete='off'
+            maxLength={6}
+          />
+          {otpFormik.touched.otp && otpFormik.errors.otp && (
+            <div className='fv-plugins-message-container'>
+              <span role='alert'>{otpFormik.errors.otp}</span>
+            </div>
+          )}
+        </div>
+        {/* end::Form group */}
+
+        {/* begin::Action */}
+        <div className='d-grid mb-10'>
+          <button
+            type='submit'
+            id='kt_verify_otp_submit'
+            className='btn btn-primary'
+            disabled={otpFormik.isSubmitting || !otpFormik.isValid}
+          >
+            {!loading && <span className='indicator-label'>Verify OTP</span>}
+            {loading && (
+              <span className='indicator-progress' style={{display: 'block'}}>
+                Please wait...
+                <span className='spinner-border spinner-border-sm align-middle ms-2'></span>
+              </span>
+            )}
+          </button>
+        </div>
+        {/* end::Action */}
+
+        {/* begin::Resend OTP */}
+        <div className='text-center'>
+          <button
+            type='button'
+            className='btn btn-link'
+            onClick={handleResendOTP}
+            disabled={resendLoading}
+          >
+            {resendLoading ? 'Resending...' : 'Resend OTP'}
+          </button>
+        </div>
+        {/* end::Resend OTP */}
+
+        {/* begin::Back to login */}
+        <div className='text-center mt-5'>
+          <button
+            type='button'
+            className='btn btn-link'
+            onClick={() => {
+              setShowOTPForm(false)
+              formik.resetForm()
+              otpFormik.resetForm()
+              setUserEmail('')
+            }}
+          >
+            Back to Login
+          </button>
+        </div>
+        {/* end::Back to login */}
+      </form>
+    )
+  }
+
+  // Show login form
   return (
     <form
       className='form w-100'
@@ -72,59 +254,11 @@ export function Login() {
       </div>
       {/* begin::Heading */}
 
-      {/* begin::Login options */}
-      <div className='row g-3 mb-9'>
-        {/* begin::Col */}
-        <div className='col-md-6'>
-          {/* begin::Google link */}
-          {/* <a
-            href='#'
-            className='btn btn-flex btn-outline btn-text-gray-700 btn-active-color-primary bg-state-light flex-center text-nowrap w-100'
-          >
-            <img
-              alt='Logo'
-              src={toAbsoluteUrl('/media/svg/brand-logos/google-icon.svg')}
-              className='h-15px me-3'
-            />
-            Sign in with Google
-          </a> */}
-          {/* end::Google link */}
-        </div>
-        {/* end::Col */}
-
-        {/* begin::Col */}
-        <div className='col-md-6'>
-          {/* begin::Google link */}
-          {/* <a
-            href='#'
-            className='btn btn-flex btn-outline btn-text-gray-700 btn-active-color-primary bg-state-light flex-center text-nowrap w-100'
-          >
-            <img
-              alt='Logo'
-              src={toAbsoluteUrl('/media/svg/brand-logos/apple-black.svg')}
-              className='theme-light-show h-15px me-3'
-            />
-            <img
-              alt='Logo'
-              src={toAbsoluteUrl('/media/svg/brand-logos/apple-black-dark.svg')}
-              className='theme-dark-show h-15px me-3'
-            />
-            Sign in with Apple
-          </a> */}
-          {/* end::Google link */}
-        </div>
-        {/* end::Col */}
-      </div>
-      {/* end::Login options */}
-
-      {/* begin::Separator */}
-      {/* <div className='separator separator-content my-14'>
-        <span className='w-125px text-gray-500 fw-semibold fs-7'>Or with email</span>
-      </div> */}
-      {/* end::Separator */}
-
       {formik.status && (
-        <div className='mb-lg-15 alert alert-danger'>
+        <div className={clsx('mb-lg-15 alert', {
+          'alert-danger': !formik.status.includes('sent'),
+          'alert-info': formik.status.includes('sent'),
+        })}>
           <div className='alert-text font-weight-bold'>{formik.status}</div>
         </div>
       )}

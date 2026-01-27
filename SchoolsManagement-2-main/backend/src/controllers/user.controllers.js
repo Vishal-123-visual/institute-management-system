@@ -2,6 +2,7 @@ import asyncHandler from "../middlewares/asyncHandler.js";
 import { userModel } from "../models/user.models.js";
 import bcryptjs from "bcryptjs";
 import { generateToken } from "../utils/createToken.js";
+import { generateOTP, getOTPExpirationTime, isOTPExpired } from "../utils/otp.utils.js";
 import jwt from "jsonwebtoken";
 import {
   BACKEND_URL,
@@ -118,7 +119,7 @@ export const registerUserController = asyncHandler(async (req, res, next) => {
   }
 });
 
-// login user controller
+// login user controller - Step 1: Send OTP
 export const loginUserController = asyncHandler(async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -140,25 +141,162 @@ export const loginUserController = asyncHandler(async (req, res, next) => {
       throw new Error("User not found!");
     }
 
-    // then compare password of the user
-    const token = generateToken(res, user._id);
-    //console.log(token);
+    // compare password of the user
     let comparePassword = await bcryptjs.compare(password, user.password);
     if (!comparePassword) {
       res.status(404);
-      throw new Error("worng credentials");
+      throw new Error("Wrong credentials");
     }
 
-    //  then return user-
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiresAt = getOTPExpirationTime();
+
+    // Save OTP to user document
+    user.otp = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    user.isOtpVerified = false;
+    await user.save();
+
+    // Send OTP via email
+    const mailOptions = {
+      from: USER_EMAIL,
+      to: user.email,
+      subject: "Your OTP for Login",
+      html: `
+        <h2>Welcome to Reliance Education</h2>
+        <p>Your OTP for login is: <strong>${otp}</strong></p>
+        <p>This OTP will expire in 5 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      `,
+    };
+
+    await mailTransporter.sendMail(mailOptions);
+
+    // Return success response with user email (but no token yet)
     res.status(200).json({
+      success: true,
+      message: "OTP sent to your email",
+      _id: user._id,
+      email: user.email,
+      first_name: user.fName,
+      last_name: user.lName,
+      requiresOTP: true,
+    });
+  } catch (error) {
+    res.status(401);
+    throw new Error(error);
+  }
+});
+
+// Step 2: Verify OTP and complete login
+export const verifyOTPAndLoginController = asyncHandler(async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    
+    if (!email) {
+      res.status(401);
+      throw new Error("Email is required!");
+    }
+    if (!otp) {
+      res.status(401);
+      throw new Error("OTP is required!");
+    }
+
+    // Find user
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found!");
+    }
+
+    // Check if OTP is expired
+    if (!user.otpExpiresAt || isOTPExpired(user.otpExpiresAt)) {
+      res.status(401);
+      throw new Error("OTP has expired. Please login again.");
+    }
+
+    // Check if OTP matches
+    if (user.otp !== otp) {
+      res.status(401);
+      throw new Error("Invalid OTP!");
+    }
+
+    // OTP verified successfully
+    user.isOtpVerified = true;
+    user.otp = null; // Clear OTP
+    user.otpExpiresAt = null; // Clear expiration time
+    
+    // Generate token for successful login
+    const token = generateToken(res, user._id);
+    user.api_token = token;
+    await user.save();
+
+    // Token expires in 1 hour (3600000 milliseconds)
+    const expiresAt = Date.now() + (60 * 60 * 1000);
+
+    // Return user with token
+    res.status(200).json({
+      success: true,
+      message: "Login successful!",
       _id: user._id,
       first_name: user.fName,
       role: user.role,
       email: user.email,
       api_token: token,
+      expiresAt: expiresAt,
       last_name: user.lName,
       email_verified_at: user.createdAt,
       updated_at: user.updatedAt,
+    });
+  } catch (error) {
+    res.status(401);
+    throw new Error(error);
+  }
+});
+
+// Resend OTP controller
+export const resendOTPController = asyncHandler(async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      res.status(401);
+      throw new Error("Email is required!");
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found!");
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const otpExpiresAt = getOTPExpirationTime();
+
+    user.otp = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    await user.save();
+
+    // Send OTP via email
+    const mailOptions = {
+      from: USER_EMAIL,
+      to: user.email,
+      subject: "Your OTP for Login (Resend)",
+      html: `
+        <h2>Welcome to Reliance Education</h2>
+        <p>Your new OTP for login is: <strong>${otp}</strong></p>
+        <p>This OTP will expire in 5 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      `,
+    };
+
+    await mailTransporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP resent to your email",
     });
   } catch (error) {
     res.status(401);

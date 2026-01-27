@@ -34,6 +34,20 @@ export function register(
   })
 }
 
+// Verify OTP and complete login
+export function verifyOTP(email: string, otp: string) {
+  return axios.post<AuthModel>(`${BASE_URL}/api/users/verify-otp`, {
+    email,
+    otp,
+  })
+}
+
+// Resend OTP
+export function resendOTP(email: string) {
+  return axios.post<{success: boolean; message: string}>(`${BASE_URL}/api/users/resend-otp`, {
+    email,
+  })
+}
 // Server should return object => { result: boolean } (Is Email in DB)
 export function requestPassword(email: string) {
   return axios.post<{result: boolean}>(`${BASE_URL}/api/users/requestPassword`, {
@@ -46,3 +60,8 @@ export function getUserByToken(token: string) {
     api_token: token,
   })
 }
+
+
+
+
+

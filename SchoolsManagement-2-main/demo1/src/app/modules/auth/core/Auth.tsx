@@ -56,6 +56,14 @@ const AuthProvider: FC<WithChildren> = ({children}) => {
     setCurrentUser(undefined)
   }
 
+  // Set up logout callback for axios interceptor
+  useEffect(() => {
+    authHelper.setLogoutCallback(logout)
+    return () => {
+      authHelper.setLogoutCallback(null as any)
+    }
+  }, [])
+
   return (
     <AuthContext.Provider value={{auth, saveAuth, currentUser, setCurrentUser, logout}}>
       {children}

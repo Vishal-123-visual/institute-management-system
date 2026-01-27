@@ -41,6 +41,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
+    // OTP fields for two-factor authentication
+    otp: {
+      type: String,
+      default: null,
+    },
+    otpExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    isOtpVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

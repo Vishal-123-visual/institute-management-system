@@ -1,6 +1,15 @@
 import { AuthModel } from './_models'
 
 const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v'
+
+const isTokenExpired = (auth: AuthModel): boolean => {
+  if (!auth.expiresAt) {
+    return false // No expiration time set
+  }
+  const currentTime = Date.now()
+  return currentTime > auth.expiresAt
+}
+
 const getAuth = (): AuthModel | undefined => {
   if (!localStorage) {
     return
@@ -14,7 +23,12 @@ const getAuth = (): AuthModel | undefined => {
   try {
     const auth: AuthModel = JSON.parse(lsValue) as AuthModel
     if (auth) {
-      // You can easily check auth_token expiration also
+      // Check if token has expired
+      if (isTokenExpired(auth)) {
+        console.warn('Token has expired, removing from storage')
+        removeAuth()
+        return undefined
+      }
       return auth
     }
   } catch (error) {
@@ -47,8 +61,16 @@ const removeAuth = () => {
   }
 }
 
+let logoutCallback: ((() => void) | null) = null
+
+const setLogoutCallback = (callback: ((() => void) | null)) => {
+  logoutCallback = callback
+}
+
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json'
+  
+  // Request Interceptor - Add token to headers
   axios.interceptors.request.use(
     (config: { headers: { Authorization: string } }) => {
       const auth = getAuth()
@@ -59,6 +81,28 @@ export function setupAxios(axios: any) {
     },
     (err: any) => Promise.reject(err)
   )
+
+  // Response Interceptor - Handle expired token (401 Unauthorized)
+  axios.interceptors.response.use(
+    (response: any) => response,
+    (error: any) => {
+      if (error.response?.status === 401) {
+        // Token expired or unauthorized - clear auth
+        console.warn('Token expired or unauthorized (401), logging out...')
+        removeAuth()
+        
+        // Call the logout callback if set, otherwise fallback to redirect
+        if (logoutCallback) {
+          logoutCallback()
+        } else if (!window.location.pathname.includes('/auth')) {
+          setTimeout(() => {
+            window.location.href = '/auth/login'
+          }, 100)
+        }
+      }
+      return Promise.reject(error)
+    }
+  )
 }
 
-export { getAuth, setAuth, removeAuth, AUTH_LOCAL_STORAGE_KEY }
+export { getAuth, setAuth, removeAuth, AUTH_LOCAL_STORAGE_KEY, isTokenExpired, setLogoutCallback }

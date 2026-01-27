@@ -5,6 +5,8 @@ import {
   getUserByTokn,
   editUserController,
   loginUserController,
+  verifyOTPAndLoginController,
+  resendOTPController,
   requsetUserPasswordController,
   getAllUsersController,
   deleteUserController,
@@ -15,15 +17,23 @@ import {
 import { isAdmin, requireSignIn } from "../middlewares/auth.middleware.js";
 
 let router = Router();
+
+// Specific routes MUST come BEFORE parameterized routes
 router.post("/register", registerUserController);
 router.post("/users/auth", loginUserController);
+router.post("/users/verify-otp", verifyOTPAndLoginController);
+router.post("/users/resend-otp", resendOTPController);
+router.post("/users/verifyToken", getUserByTokn);
+router.post("/users/requestPassword", requsetUserPasswordController);
+router.post("/reset-password/:id/:token", resetPasswordController);
+
+// General /users routes
 router
   .route("/users")
   .get(requireSignIn, getAllUsersController)
   .post(requireSignIn, isAdmin, addUsersControllers);
-router.post("/users/verifyToken", getUserByTokn);
-router.post("/users/requestPassword", requsetUserPasswordController);
-router.post("/reset-password/:id/:token", resetPasswordController);
+
+// Parameterized routes MUST come LAST
 router
   .route("/users/:id")
   .get(requireSignIn, isAdmin, getUserByIdController)

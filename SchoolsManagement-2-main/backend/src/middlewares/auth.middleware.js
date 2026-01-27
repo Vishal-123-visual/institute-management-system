@@ -5,7 +5,7 @@ import { JWT_SECRET } from "../config/config.js";
 //Protected Routes token base
 export const requireSignIn = async (req, res, next) => {
   try {
-    // console.log(req.headers);
+   //console.log('token', req.cookies.jwt);
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res
