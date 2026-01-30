@@ -3,7 +3,7 @@ import { JWT_SECRET, NODE_ENV } from "../config/config.js"
 
 export const generateToken =  (res, userId) => {
     const token = jwt.sign({ userId }, JWT_SECRET, {
-        expiresIn: '30s'
+        expiresIn: '1h'
     });
 
     // set jwt as http only cookie 
@@ -11,7 +11,7 @@ export const generateToken =  (res, userId) => {
         httpOnly: true,
         secure: NODE_ENV !== "development",
         sameSite: "lax",
-        maxAge: 30 * 1000,
+        maxAge: 60 * 60 * 1000,
     })
 
     return token;
